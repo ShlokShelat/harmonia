@@ -1712,8 +1712,16 @@
         display: none;
       }
 
+      .hamburger-btn {
+        display: flex;
+      }
+
       .hero {
         padding: 36px 20px;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
       }
 
       .waveform-canvas {
@@ -1753,11 +1761,24 @@
         position: absolute;
         left: 10px;
       }
+
+      .section-title {
+        font-size: 1.8rem;
+      }
+
+      .container {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .nav-username {
+        display: none;
+      }
     }
 
     @media(max-width:600px) {
       .dash-stats {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
       }
 
       .map-regions {
@@ -1766,6 +1787,198 @@
 
       .param-grid {
         grid-template-columns: 1fr;
+      }
+
+      .grid-3,
+      .grid-4,
+      .achievements-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 1.5rem;
+      }
+
+      .hero p {
+        font-size: 0.92rem;
+      }
+
+      .section-title {
+        font-size: 1.4rem;
+      }
+
+      .section-sub {
+        font-size: 0.88rem;
+      }
+
+      .auth-card {
+        padding: 28px 20px;
+        max-width: 100%;
+        margin: 16px;
+        border-radius: 16px;
+      }
+
+      .chip {
+        font-size: 0.72rem;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .nav-actions .btn {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+      }
+
+      .nav-user {
+        display: none;
+      }
+
+      .btn {
+        font-size: 0.82rem;
+        padding: 8px 14px;
+      }
+    }
+
+    @media(max-width:480px) {
+      nav {
+        padding: 0 10px;
+      }
+
+      .nav-logo {
+        font-size: 1.2rem;
+      }
+
+      .theme-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+      }
+
+      .hero {
+        padding: 24px 14px;
+      }
+
+      .hero h1 {
+        font-size: 1.3rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .container {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+
+    /* ─── HAMBURGER MENU ─── */
+    .hamburger-btn {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      z-index: 1001;
+    }
+
+    .hamburger-btn span {
+      display: block;
+      width: 24px;
+      height: 2.5px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .hamburger-btn.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger-btn.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    /* ─── MOBILE NAV OVERLAY ─── */
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 280px;
+      height: 100vh;
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      z-index: 1000;
+      padding: 80px 24px 32px;
+      flex-direction: column;
+      gap: 8px;
+      transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.3);
+    }
+
+    .mobile-nav-overlay.open {
+      right: 0;
+    }
+
+    .mobile-nav-overlay button {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 14px 16px;
+      text-align: left;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .mobile-nav-overlay button:hover {
+      background: var(--bg3);
+    }
+
+    .mobile-nav-overlay button.active {
+      background: linear-gradient(135deg, rgba(192,132,252,0.15), rgba(96,165,250,0.1));
+      color: var(--accent);
+    }
+
+    .mobile-nav-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .mobile-nav-backdrop.open {
+      opacity: 1;
+    }
+
+    @media(max-width:900px) {
+      .mobile-nav-overlay,
+      .mobile-nav-backdrop {
+        display: flex;
       }
     }
 
@@ -2195,6 +2408,10 @@
       <button onclick="showPage('dashboard')" id="navbtn-dashboard" role="menuitem">📊 Dashboard</button>
       <button onclick="showPage('concerts')" id="navbtn-concerts" role="menuitem">🎟️ Concerts</button>
     </div>
+    <!-- Hamburger Menu Button (mobile) -->
+    <button class="hamburger-btn" onclick="toggleMobileNav()" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="nav-actions">
       <button class="theme-btn" onclick="openSearch()" aria-label="Search" title="Search (Ctrl+K)">🔍</button>
       <button class="theme-btn" id="btn-theme" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
@@ -2209,6 +2426,19 @@
         out</button>
     </div>
   </nav>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" onclick="toggleMobileNav()"></div>
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+    <button onclick="showPage('training'); toggleMobileNav();">🎸 Training</button>
+    <button onclick="showPage('ai-gen'); toggleMobileNav();">✨ AI Generator</button>
+    <button onclick="showPage('history'); toggleMobileNav();">📚 Music History</button>
+    <button onclick="showPage('anatomy'); toggleMobileNav();">🎻 3D Anatomy</button>
+    <button onclick="showPage('dashboard'); toggleMobileNav();">📊 Dashboard</button>
+    <button onclick="showPage('concerts'); toggleMobileNav();">🎟️ Concerts</button>
+    <div style="border-top:1px solid var(--border);margin:12px 0;"></div>
+    <button onclick="doLogout(); toggleMobileNav();" style="color:var(--red);">🚪 Sign Out</button>
+  </div>
 
   <!-- SEARCH OVERLAY -->
   <div id="search-overlay"
@@ -3352,6 +3582,27 @@
     function totalLessons() {
       if (!currentUser || !currentUser.lessonsCompleted) return 0;
       return Object.values(currentUser.lessonsCompleted).flat().length;
+    }
+
+    /* ════════════════════════════════════════
+       MOBILE NAV
+    ════════════════════════════════════════ */
+    function toggleMobileNav() {
+      const overlay = document.getElementById('mobile-nav-overlay');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      const hamburger = document.querySelector('.hamburger-btn');
+      const isOpen = overlay.classList.contains('open');
+      if (isOpen) {
+        overlay.classList.remove('open');
+        backdrop.classList.remove('open');
+        hamburger.classList.remove('active');
+        document.body.style.overflow = '';
+      } else {
+        overlay.classList.add('open');
+        backdrop.classList.add('open');
+        hamburger.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
     }
 
     /* ════════════════════════════════════════
