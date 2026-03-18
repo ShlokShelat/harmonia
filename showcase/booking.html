@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia — Book Tickets</title>
+  <meta name="description" content="Select your seats and book tickets for live concerts.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html">AI Generator</a><a href="dashboard.html">Dashboard</a><a href="concerts.html">Concerts</a><a href="history.html">History</a><a href="anatomy.html">3D Anatomy</a><a href="my-bookings.html">My Bookings</a><a href="profile.html">Profile</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content">
+  <!-- Booking View -->
+  <div id="booking-view">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <a href="javascript:history.back()" style="color:var(--text2);font-size:0.82rem;">← Back to Event</a>
+    </div>
+    <h1 class="section-title" style="font-size:1.6rem;margin-bottom:4px;" id="booking-title">Select Your Seats</h1>
+    <p style="color:var(--text2);font-size:0.88rem;margin-bottom:16px;" id="booking-event-name">—</p>
+
+    <!-- Timer -->
+    <div class="booking-timer" id="booking-timer">
+      <span class="booking-timer-icon">⏳</span>
+      <div class="booking-timer-text">
+        <div style="font-weight:600;font-size:0.85rem;">Seats reserved for</div>
+        <div class="booking-timer-bar"><div class="booking-timer-bar-fill" id="timer-bar" style="width:100%;"></div></div>
+      </div>
+      <span class="booking-timer-time" id="timer-display">08:00</span>
+    </div>
+
+    <div class="booking-layout">
+      <!-- LEFT: Seat Map -->
+      <div>
+        <div class="seat-map-container">
+          <div class="seat-map-stage">🎤 STAGE</div>
+          <div class="seat-map-grid" id="seat-map"></div>
+          <div class="seat-legend">
+            <div class="seat-legend-item"><div class="seat-legend-dot" style="background:linear-gradient(135deg,#f59e0b,#d97706);"></div> VIP — ₹<span id="lg-vip">0</span></div>
+            <div class="seat-legend-item"><div class="seat-legend-dot" style="background:linear-gradient(135deg,var(--accent),var(--accent2));"></div> Premium — ₹<span id="lg-prem">0</span></div>
+            <div class="seat-legend-item"><div class="seat-legend-dot" style="background:linear-gradient(135deg,var(--sky),#0284c7);"></div> Regular — ₹<span id="lg-reg">0</span></div>
+            <div class="seat-legend-item"><div class="seat-legend-dot" style="background:var(--bg3);opacity:0.4;"></div> Unavailable</div>
+            <div class="seat-legend-item"><div class="seat-legend-dot" style="background:var(--emerald);outline:2px solid white;outline-offset:1px;"></div> Selected</div>
+          </div>
+        </div>
+        <p style="color:var(--text3);font-size:0.72rem;margin-top:8px;text-align:center;">Click seats to select (max 6). Click again to deselect.</p>
+        <div class="hci-badge design-principle" style="margin-top:12px;">
+          <div class="hci-badge-category">Design Principle</div>
+          <div class="hci-badge-title">🖱️ Direct Manipulation</div>
+          <div class="hci-badge-desc">Users click directly on seats to select/deselect — the interface mirrors the real-world action of choosing a seat in a venue.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Summary -->
+      <div>
+        <div class="booking-summary">
+          <h3>🎟️ Booking Summary</h3>
+          <div id="selected-seats-list" style="margin-bottom:10px;">
+            <div class="empty-state" style="padding:20px;"><div class="empty-state-icon" style="font-size:1.5rem;">💺</div><div class="empty-state-text" style="font-size:0.78rem;">No seats selected yet</div></div>
+          </div>
+          <div id="summary-pricing" style="display:none;">
+            <div class="booking-summary-row"><span>Subtotal</span><span id="sum-subtotal">₹0</span></div>
+            <div class="booking-summary-row"><span style="color:var(--text3);">Convenience Fee (4%)</span><span id="sum-fee" style="color:var(--text3);">₹0</span></div>
+            <div class="booking-summary-row"><span style="color:var(--text3);">GST (18% on fee)</span><span id="sum-gst" style="color:var(--text3);">₹0</span></div>
+            <div class="booking-summary-row total"><span>Total</span><span id="sum-total">₹0</span></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" id="pay-btn" onclick="confirmBooking()" disabled>Select seats to continue</button>
+        </div>
+        <div class="hci-badge usability-principle" style="margin-top:12px;">
+          <div class="hci-badge-category">Universal Usability</div>
+          <div class="hci-badge-title">⏳ Countdown & Urgency</div>
+          <div class="hci-badge-desc">Timer creates urgency while the sticky summary keeps pricing visible — reducing cognitive load during the booking decision.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation View -->
+  <div id="confirm-view" style="display:none;">
+    <div class="booking-confirm animate-scale-in">
+      <div class="booking-confirm-icon">🎉</div>
+      <div class="booking-confirm-title">Booking Confirmed!</div>
+      <p style="color:var(--text2);margin-bottom:8px;" id="confirm-event">—</p>
+      <div class="qr-placeholder"><div class="qr-pattern"></div></div>
+      <div style="font-family:var(--font-mono);color:var(--accent);font-weight:700;font-size:1rem;margin-bottom:6px;" id="confirm-code">TK-XXXXXXXX</div>
+      <div id="confirm-seats" style="color:var(--text2);font-size:0.85rem;margin-bottom:20px;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a href="my-bookings.html" class="btn btn-primary">📋 View My Bookings</a>
+        <a href="concerts.html" class="btn btn-secondary">🔍 Browse More Events</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning & live events platform.</p></div></div><div class="footer-bottom"><span>© 2026 Harmonia</span><span>HCI Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+
+/* ── EVENT DATA (simplified subset) ── */
+const EVENTS={1:{title:'Arijit Singh Live',venue:'NSCI Dome',city:'Mumbai',vip:5000,prem:3500,reg:2500},2:{title:'The Local Train — Farewell Tour',venue:'Jio Garden',city:'Mumbai',vip:4000,prem:3000,reg:2000},3:{title:'Nucleya Bass Drop',venue:'Mahalaxmi Lawns',city:'Pune',vip:3500,prem:2500,reg:1800},4:{title:'NH7 Weekender',venue:'Magarpatta City',city:'Pune',vip:8000,prem:5500,reg:3500},5:{title:'AR Rahman World Tour',venue:'JLN Stadium',city:'New Delhi',vip:6000,prem:4500,reg:3000},6:{title:'Anuv Jain Live',venue:'Select City Walk',city:'New Delhi',vip:2800,prem:2000,reg:1400},7:{title:'Delhi Jazz Festival',venue:'India Habitat Centre',city:'New Delhi',vip:2500,prem:1800,reg:1000},8:{title:'Indie Music Festival',venue:'Palace Grounds',city:'Bengaluru',vip:3500,prem:2500,reg:1500},9:{title:'Prateek Kuhad Live',venue:'Phoenix Marketcity',city:'Bengaluru',vip:3500,prem:2500,reg:1800},10:{title:'AR Rahman Chennai',venue:'Nehru Stadium',city:'Chennai',vip:7000,prem:5000,reg:3500},14:{title:'Sunburn Festival 2026',venue:'Vagator Beach',city:'Goa',vip:12000,prem:8000,reg:5000},18:{title:'Diljit Dosanjh Live',venue:'PAU Ground',city:'Ludhiana',vip:5000,prem:3500,reg:2500}};
+
+const params = new URLSearchParams(window.location.search);
+const eventId = parseInt(params.get('id')) || 1;
+const ev = EVENTS[eventId] || EVENTS[1];
+
+/* ── SEAT MAP CONFIG ── */
+const ROWS = 12, COLS = 16;
+const ROW_LABELS = 'ABCDEFGHIJKLMN'.split('');
+let selectedSeats = [];
+const takenSeats = new Set();
+// Randomly mark ~25% as taken
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  if (Math.random() < 0.25) takenSeats.add(`${r}-${c}`);
+}
+
+function getSeatType(r) {
+  if (r < 3) return 'vip';
+  if (r < 7) return 'premium';
+  return 'regular';
+}
+function getSeatPrice(type) {
+  if (type === 'vip') return ev.vip;
+  if (type === 'premium') return ev.prem;
+  return ev.reg;
+}
+
+function buildSeatMap() {
+  const map = document.getElementById('seat-map');
+  map.innerHTML = '';
+  for (let r = 0; r < ROWS; r++) {
+    const row = document.createElement('div');
+    row.className = 'seat-row';
+    // Left label
+    row.innerHTML = `<span class="seat-row-label">${ROW_LABELS[r]}</span>`;
+    for (let c = 0; c < COLS; c++) {
+      // Add aisle gap in middle
+      if (c === COLS/2) {
+        const gap = document.createElement('div');
+        gap.className = 'seat seat-gap';
+        gap.style.width = '12px';
+        row.appendChild(gap);
+      }
+      const seat = document.createElement('button');
+      const key = `${r}-${c}`;
+      const type = getSeatType(r);
+      const taken = takenSeats.has(key);
+      seat.className = `seat seat-${taken ? 'taken' : type}`;
+      seat.dataset.key = key;
+      seat.dataset.type = type;
+      seat.dataset.label = `${ROW_LABELS[r]}${c+1}`;
+      if (!taken) seat.onclick = () => toggleSeat(key, type, seat);
+      seat.textContent = c + 1;
+      row.appendChild(seat);
+    }
+    // Right label
+    row.innerHTML += `<span class="seat-row-label">${ROW_LABELS[r]}</span>`;
+    map.appendChild(row);
+  }
+}
+
+function toggleSeat(key, type, el) {
+  const idx = selectedSeats.findIndex(s => s.key === key);
+  if (idx >= 0) {
+    selectedSeats.splice(idx, 1);
+    el.classList.remove('seat-selected');
+  } else {
+    if (selectedSeats.length >= 6) { showToast('⚠️ Maximum 6 seats per booking'); return; }
+    selectedSeats.push({key, type, label: el.dataset.label, price: getSeatPrice(type)});
+    el.classList.add('seat-selected');
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const list = document.getElementById('selected-seats-list');
+  const pricing = document.getElementById('summary-pricing');
+  const payBtn = document.getElementById('pay-btn');
+
+  if (!selectedSeats.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="empty-state-icon" style="font-size:1.5rem;">💺</div><div class="empty-state-text" style="font-size:0.78rem;">No seats selected yet</div></div>';
+    pricing.style.display = 'none';
+    payBtn.disabled = true;
+    payBtn.textContent = 'Select seats to continue';
+    return;
+  }
+
+  list.innerHTML = selectedSeats.map(s => {
+    const colors = {vip:'#f59e0b',premium:'var(--accent)',regular:'var(--sky)'};
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;font-size:0.82rem;">
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:${colors[s.type]};margin-right:6px;"></span>${s.label} <span style="color:var(--text3);text-transform:capitalize;">(${s.type})</span></span>
+      <span style="font-weight:600;">₹${s.price.toLocaleString()}</span>
+    </div>`;
+  }).join('');
+
+  const subtotal = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+  const fee = Math.round(subtotal * 0.04);
+  const gst = Math.round(fee * 0.18);
+  const total = subtotal + fee + gst;
+
+  document.getElementById('sum-subtotal').textContent = `₹${subtotal.toLocaleString()}`;
+  document.getElementById('sum-fee').textContent = `₹${fee.toLocaleString()}`;
+  document.getElementById('sum-gst').textContent = `₹${gst.toLocaleString()}`;
+  document.getElementById('sum-total').textContent = `₹${total.toLocaleString()}`;
+  pricing.style.display = 'block';
+  payBtn.disabled = false;
+  payBtn.textContent = `💳 Pay ₹${total.toLocaleString()}`;
+}
+
+/* ── COUNTDOWN TIMER ── */
+let timerSeconds = 8 * 60; // 8 minutes
+const timerInterval = setInterval(() => {
+  timerSeconds--;
+  if (timerSeconds <= 0) {
+    clearInterval(timerInterval);
+    showToast('⏰ Session expired! Please start over.');
+    setTimeout(() => history.back(), 2000);
+    return;
+  }
+  const m = Math.floor(timerSeconds / 60).toString().padStart(2,'0');
+  const s = (timerSeconds % 60).toString().padStart(2,'0');
+  document.getElementById('timer-display').textContent = `${m}:${s}`;
+  document.getElementById('timer-bar').style.width = `${(timerSeconds / (8*60)) * 100}%`;
+
+  const timer = document.getElementById('booking-timer');
+  if (timerSeconds < 120) timer.classList.add('warning');
+  else timer.classList.remove('warning');
+}, 1000);
+
+/* ── CONFIRM BOOKING ── */
+function confirmBooking() {
+  clearInterval(timerInterval);
+  document.getElementById('booking-view').style.display = 'none';
+  document.getElementById('confirm-view').style.display = 'block';
+  document.getElementById('confirm-event').textContent = `${ev.title} • ${ev.venue}, ${ev.city}`;
+  document.getElementById('confirm-code').textContent = 'TK-' + Math.random().toString(36).substring(2,10).toUpperCase();
+  document.getElementById('confirm-seats').textContent = `Seats: ${selectedSeats.map(s=>s.label).join(', ')}`;
+
+  // Save to localStorage for My Bookings
+  const bookings = JSON.parse(localStorage.getItem('harmonia_bookings') || '[]');
+  bookings.push({
+    id: Date.now(),
+    eventId,
+    title: ev.title,
+    venue: ev.venue,
+    city: ev.city,
+    seats: selectedSeats.map(s=>s.label),
+    total: selectedSeats.reduce((sum,s)=>sum+s.price,0),
+    code: document.getElementById('confirm-code').textContent,
+    date: new Date().toISOString()
+  });
+  localStorage.setItem('harmonia_bookings', JSON.stringify(bookings));
+  showToast('🎉 Booking confirmed!');
+}
+
+/* ── INIT ── */
+document.getElementById('booking-event-name').textContent = `${ev.title} — ${ev.venue}, ${ev.city}`;
+document.getElementById('lg-vip').textContent = ev.vip.toLocaleString();
+document.getElementById('lg-prem').textContent = ev.prem.toLocaleString();
+document.getElementById('lg-reg').textContent = ev.reg.toLocaleString();
+buildSeatMap();
+</script>
+</body>
+</html>

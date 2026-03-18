@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia Showcase — Dashboard</title>
+  <meta name="description" content="Track progress with XP, streaks, achievements, and analytics.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html">AI Generator</a><a href="dashboard.html" class="active">Dashboard</a><a href="concerts.html">Concerts</a><a href="history.html">History</a><a href="anatomy.html">3D Anatomy</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+    <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--coral));display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎵</div>
+    <div>
+      <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:800;">Shlok Shelat</div>
+      <div style="color:var(--text2);font-size:0.82rem;">⭐ Level 5 • Member since Mar 2025</div>
+    </div>
+  </div>
+  <div class="hci-badge usability-principle">
+    <div class="hci-badge-category">Universal Usability</div>
+    <div class="hci-badge-title">👤 Personalization</div>
+    <div class="hci-badge-desc">Greeting with user name and avatar creates a sense of ownership, adaptable for diverse users.</div>
+  </div>
+
+  <div class="dash-stats" id="stats-grid" style="margin-top:16px;">
+    <div class="dash-stat"><div class="dash-stat-val" id="d-xp">0</div><div class="dash-stat-label">Total XP</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="d-lessons">0</div><div class="dash-stat-label">Lessons Done</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="d-tracks">0</div><div class="dash-stat-label">AI Tracks</div></div>
+    <div class="dash-stat"><div class="dash-stat-val" id="d-streak">0</div><div class="dash-stat-label">Day Streak 🔥</div></div>
+  </div>
+  <div class="hci-badge design-principle">
+    <div class="hci-badge-category">Design Principle</div>
+    <div class="hci-badge-title">👁️ Visibility of System Status</div>
+    <div class="hci-badge-desc">Four stat cards provide immediate overview of progress — XP, lessons, tracks, and streak are always visible at a glance.</div>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px;margin-bottom:20px;align-items:start;">
+    <div class="chart-container">
+      <div class="chart-title">📊 Practice Sessions This Week</div>
+      <div class="bar-chart" id="practice-chart"></div>
+      <div style="height:24px;"></div>
+      <div class="hci-badge design-principle">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">📊 Information Density</div>
+        <div class="hci-badge-desc">Bar chart encodes 7 days of practice in a compact visual — dense info without textual overload.</div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title">🗓 30-Day Activity Calendar</div>
+      <div class="streak-row" id="streak-calendar"></div>
+      <div class="hci-badge usability-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">🎨 Color Coding & Gestalt</div>
+        <div class="hci-badge-desc">Green=active, orange=today, grey=missed. Gestalt proximity groups days into a scannable calendar.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px;">
+    <h3 style="font-weight:700;margin-bottom:14px;">🎸 Instrument Progress</h3>
+    <div id="instrument-progress"></div>
+    <div class="hci-badge design-principle">
+      <div class="hci-badge-category">Design Principle</div>
+      <div class="hci-badge-title">📋 Recognition over Recall</div>
+      <div class="hci-badge-desc">Progress bars with percentage labels let users see skill levels at a glance — no need to memorize past scores.</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <h3 style="font-weight:700;margin-bottom:10px;">📋 Recent Activity</h3>
+      <div id="activity-log"></div>
+    </div>
+    <div>
+      <h3 style="font-weight:700;margin-bottom:10px;">🏆 Achievements</h3>
+      <div class="achievements-grid" id="achievements-grid"></div>
+      <div class="hci-badge design-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">🎮 Gamification</div>
+        <div class="hci-badge-desc">XP, levels, streaks, achievements use game mechanics to motivate continuous learning.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hci-badge usability-principle" style="margin-top:16px;">
+    <div class="hci-badge-category">Universal Usability</div>
+    <div class="hci-badge-title">📱 Responsive Design</div>
+    <div class="hci-badge-desc">Dashboard grid adapts 4→2→1 columns based on screen width — ensuring usability on all devices.</div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning platform.</p></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Pages</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="training.html" style="color:var(--text2);font-size:0.82rem;">Training</a><a href="ai-generator.html" style="color:var(--text2);font-size:0.82rem;">AI Generator</a><a href="dashboard.html" style="color:var(--text2);font-size:0.82rem;">Dashboard</a><a href="concerts.html" style="color:var(--text2);font-size:0.82rem;">Concerts</a><a href="history.html" style="color:var(--text2);font-size:0.82rem;">History</a><a href="anatomy.html" style="color:var(--text2);font-size:0.82rem;">3D Anatomy</a></div></div></div><div class="footer-bottom"><span>© 2025 Harmonia Showcase</span><span>HCI — Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+function initStats(){animateCounter(document.getElementById('d-xp'),1280);animateCounter(document.getElementById('d-lessons'),12);animateCounter(document.getElementById('d-tracks'),8);animateCounter(document.getElementById('d-streak'),5);}
+function buildPracticeChart(){const c=document.getElementById('practice-chart');if(!c)return;const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],data=[35,22,45,18,52,40,28],mx=Math.max(...data);c.innerHTML='';days.forEach((day,i)=>{const b=document.createElement('div');b.className='bar-chart-bar';b.setAttribute('data-day',day);b.style.height='0%';b.title=data[i]+' min';c.appendChild(b);setTimeout(()=>b.style.height=(data[i]/mx*100)+'%',100+i*80);});}
+function buildStreakCalendar(){const c=document.getElementById('streak-calendar');if(!c)return;c.innerHTML='';const today=new Date();for(let i=29;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const el=document.createElement('div');el.className='streak-day';el.classList.add(i===0?'today':Math.random()>0.35?'done':'miss');el.textContent=d.getDate();el.title=d.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'});c.appendChild(el);}}
+function buildInstrumentProgress(){const c=document.getElementById('instrument-progress');if(!c)return;const instr=[{name:'Piano',icon:'🎹',level:'Intermediate',progress:65,color:'var(--accent)'},{name:'Guitar',icon:'🎸',level:'Beginner',progress:30,color:'var(--emerald)'},{name:'Drums',icon:'🥁',level:'Advanced',progress:82,color:'var(--amber)'},{name:'Violin',icon:'🎻',level:'Beginner',progress:15,color:'var(--coral)'},{name:'Flute',icon:'🪈',level:'Beginner',progress:10,color:'var(--sky)'}];c.innerHTML=instr.map(i=>`<div style="margin-bottom:14px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;"><div style="display:flex;align-items:center;gap:7px;"><span>${i.icon}</span><span style="font-weight:600;font-size:0.85rem;">${i.name}</span><span class="badge badge-${i.level==='Advanced'?'amber':i.level==='Intermediate'?'sky':'green'}" style="font-size:0.65rem;">${i.level}</span></div><span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2);">${i.progress}%</span></div><div class="progress-bar-wrap"><div class="progress-bar" style="width:0%;background:linear-gradient(90deg,${i.color},${i.color}88);"></div></div></div>`).join('');setTimeout(()=>{c.querySelectorAll('.progress-bar').forEach((b,idx)=>b.style.width=instr[idx].progress+'%');},200);}
+function buildActivityLog(){const c=document.getElementById('activity-log');if(!c)return;const acts=[{icon:'🎹',text:'Completed Piano Lesson 5',time:'2m ago'},{icon:'⭐',text:'Earned 20 XP — Scale challenge',time:'15m ago'},{icon:'🎵',text:'Generated "Midnight Aurora"',time:'1h ago'},{icon:'🥁',text:'Drum session — 85 pts',time:'3h ago'},{icon:'🏆',text:'Achievement: Beat Keeper',time:'3h ago'},{icon:'🎸',text:'Guitar practice 12 min',time:'Yesterday'},{icon:'🎟️',text:'Booked: AR Rahman, Delhi',time:'Yesterday'},{icon:'⭐',text:'Earned 15 XP — Guitar',time:'2d ago'}];c.innerHTML=acts.map(a=>`<div class="log-item"><span class="log-icon">${a.icon}</span><span class="log-text">${a.text}</span><span class="log-time">${a.time}</span></div>`).join('');}
+function buildAchievements(){const c=document.getElementById('achievements-grid');if(!c)return;const achs=[{icon:'🎹',name:'First Note',desc:'Play first note',u:true},{icon:'⭐',name:'XP Climber',desc:'Earn 100 XP',u:true},{icon:'🏆',name:'XP Master',desc:'Earn 500 XP',u:true},{icon:'🔥',name:'Hot Streak',desc:'3-day streak',u:true},{icon:'🔥',name:'Week Warrior',desc:'7-day streak',u:false},{icon:'🎼',name:'Scale Master',desc:'Complete C Major',u:true},{icon:'🎵',name:'AI Composer',desc:'Generate first track',u:true},{icon:'🥁',name:'Beat Keeper',desc:'100 drum score',u:true},{icon:'📚',name:'Student',desc:'Complete 5 lessons',u:true},{icon:'🌟',name:'Virtuoso',desc:'Reach Level 10',u:false},{icon:'🎶',name:'Melody Maker',desc:'10 AI tracks',u:false},{icon:'💎',name:'Diamond',desc:'30-day streak',u:false}];c.innerHTML=achs.map(a=>`<div class="achievement ${a.u?'':'locked'}"><div class="ach-icon">${a.icon}</div><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div>`).join('');}
+initStats();buildPracticeChart();buildStreakCalendar();buildInstrumentProgress();buildActivityLog();buildAchievements();
+</script>
+</body>
+</html>

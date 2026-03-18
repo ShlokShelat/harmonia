@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia — About</title>
+  <meta name="description" content="About Harmonia — interactive music learning and live events platform.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .about-hero{text-align:center;padding:50px 0 40px;position:relative;}
+    .about-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 30%,rgba(16,185,129,0.06),transparent 70%);pointer-events:none;}
+    .mission-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:30px;text-align:center;margin-bottom:30px;}
+    .feature-highlight{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+    .feature-highlight:last-child{border-bottom:none;}
+    .feature-num{width:36px;height:36px;border-radius:10px;background:rgba(249,115,22,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;flex-shrink:0;}
+    .contact-form{display:flex;flex-direction:column;gap:12px;}
+  </style>
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html">AI Generator</a><a href="dashboard.html">Dashboard</a><a href="concerts.html">Concerts</a><a href="history.html">History</a><a href="anatomy.html">3D Anatomy</a><a href="my-bookings.html">My Bookings</a><a href="profile.html">Profile</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content">
+  <div class="about-hero">
+    <div class="chip">ℹ️ About</div>
+    <h1 class="section-title"><span class="gradient-text">About Harmonia</span></h1>
+    <p class="section-sub" style="max-width:560px;margin:0 auto;">An interactive music learning and live events platform built with HCI design principles and universal usability at its core.</p>
+  </div>
+
+  <!-- Mission -->
+  <div class="mission-card">
+    <div style="font-size:2.5rem;margin-bottom:10px;">🎵</div>
+    <h2 style="font-family:var(--font-display);font-weight:800;font-size:1.5rem;margin-bottom:8px;">Our Mission</h2>
+    <p style="color:var(--text2);font-size:0.92rem;max-width:500px;margin:0 auto;line-height:1.7;">To make music education accessible, interactive, and enjoyable for everyone — while connecting music lovers to live performances across India.</p>
+  </div>
+
+  <!-- Features -->
+  <div class="grid-2" style="gap:24px;margin-bottom:30px;align-items:start;">
+    <div class="card">
+      <h3 style="font-weight:700;margin-bottom:12px;">🎯 What We Offer</h3>
+      <div class="feature-highlight"><div class="feature-num">1</div><div><div style="font-weight:600;font-size:0.88rem;">Instrument Training</div><div style="font-size:0.78rem;color:var(--text2);">Piano, guitar, drums, violin & flute with real-time audio</div></div></div>
+      <div class="feature-highlight"><div class="feature-num">2</div><div><div style="font-weight:600;font-size:0.88rem;">AI Music Generator</div><div style="font-size:0.78rem;color:var(--text2);">Generate unique tracks with customizable parameters</div></div></div>
+      <div class="feature-highlight"><div class="feature-num">3</div><div><div style="font-weight:600;font-size:0.88rem;">Live Concerts</div><div style="font-size:0.78rem;color:var(--text2);">Discover, book tickets, and list your own shows</div></div></div>
+      <div class="feature-highlight"><div class="feature-num">4</div><div><div style="font-weight:600;font-size:0.88rem;">Music History</div><div style="font-size:0.78rem;color:var(--text2);">Interactive timeline from ancient to modern music</div></div></div>
+      <div class="feature-highlight"><div class="feature-num">5</div><div><div style="font-weight:600;font-size:0.88rem;">3D Instrument Anatomy</div><div style="font-size:0.78rem;color:var(--text2);">SVG diagrams with interactive hotspots and audio</div></div></div>
+    </div>
+
+    <!-- FAQ -->
+    <div>
+      <h3 style="font-weight:700;margin-bottom:12px;">❓ Frequently Asked Questions</h3>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <button class="faq-question">Is Harmonia free to use? <span class="faq-arrow">▼</span></button>
+        <div class="faq-answer">Yes! All learning features including instrument training, AI music generation, and music history are completely free. Concert ticket prices are set by event organizers.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <button class="faq-question">How do I book concert tickets? <span class="faq-arrow">▼</span></button>
+        <div class="faq-answer">Browse concerts from the Concerts page, click on an event to see details, select your ticket tier and quantity, then proceed to our interactive seat selection. Choose your preferred seats and confirm your booking!</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <button class="faq-question">Can I list my own concert? <span class="faq-arrow">▼</span></button>
+        <div class="faq-answer">Absolutely! Go to Concerts → "List Your Show" tab. Fill in your event details, set ticket categories and pricing, preview how it looks, and publish. Your event will be visible immediately.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <button class="faq-question">What instruments can I learn? <span class="faq-arrow">▼</span></button>
+        <div class="faq-answer">We currently offer piano, guitar, drums, violin, and flute — all with real-time Web Audio API-powered synthesis. No plugins or downloads needed!</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <button class="faq-question">How does the AI music generator work? <span class="faq-arrow">▼</span></button>
+        <div class="faq-answer">Describe your desired track using a text prompt, select genre, mood, tempo and key. Our system generates a unique composition using procedural synthesis. You can also add AI-generated lyrics!</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <button class="faq-question">What are the HCI annotations? <span class="faq-arrow">▼</span></button>
+        <div class="faq-answer">Harmonia is a showcase of HCI (Human-Computer Interaction) design principles. Click the "📐 Show HCI Principles" button on any page to see inline annotations explaining the design decisions and usability patterns used.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact -->
+  <div class="card" style="max-width:500px;margin:0 auto;">
+    <h3 style="font-weight:700;margin-bottom:12px;">📬 Get in Touch</h3>
+    <p style="color:var(--text2);font-size:0.82rem;margin-bottom:14px;">Have a question or suggestion? We'd love to hear from you.</p>
+    <div class="contact-form">
+      <div><label class="form-label">Name</label><input type="text" id="contact-name" placeholder="Your name"></div>
+      <div><label class="form-label">Email</label><input type="email" id="contact-email" placeholder="your@email.com"></div>
+      <div><label class="form-label">Message</label><textarea id="contact-msg" rows="4" placeholder="Tell us what's on your mind..."></textarea></div>
+      <button class="btn btn-primary" style="justify-content:center;" onclick="submitContact()">Send Message →</button>
+    </div>
+  </div>
+
+  <div class="hci-badge usability-principle" style="margin-top:20px;">
+    <div class="hci-badge-category">Universal Usability</div>
+    <div class="hci-badge-title">📖 Help & Documentation</div>
+    <div class="hci-badge-desc">FAQ section provides proactive support — answering common questions before users need to contact support.</div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning & live events platform.</p></div></div><div class="footer-bottom"><span>© 2026 Harmonia</span><span>HCI Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+function toggleFAQ(el) { el.classList.toggle('open'); }
+function submitContact() {
+  const n = document.getElementById('contact-name').value.trim();
+  const e = document.getElementById('contact-email').value.trim();
+  const m = document.getElementById('contact-msg').value.trim();
+  if (!n || !e || !m) { showToast('⚠️ Please fill all fields'); return; }
+  showToast('✅ Message sent! We\'ll get back to you soon.');
+  ['contact-name','contact-email','contact-msg'].forEach(id => document.getElementById(id).value = '');
+}
+</script>
+</body>
+</html>

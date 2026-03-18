@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia — Event Details</title>
+  <meta name="description" content="View event details and book tickets for live concerts across India.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .detail-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;}
+    .info-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+    .info-label{font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:4px;}
+    .info-row{display:flex;gap:14px;flex-wrap:wrap;}
+    .info-item{flex:1;min-width:140px;}
+    .ticket-tier{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:10px;margin-bottom:8px;transition:all .2s;cursor:pointer;border:2px solid transparent;}
+    .ticket-tier:hover,.ticket-tier.selected{border-color:var(--accent);}
+    .ticket-tier-dot{width:12px;height:12px;border-radius:4px;flex-shrink:0;}
+    .ticket-tier-name{font-weight:600;font-size:0.85rem;flex:1;}
+    .ticket-tier-price{font-family:var(--font-display);font-weight:800;font-size:1rem;}
+    .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:14px;}
+    .related-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .25s;}
+    .related-card:hover{transform:translateY(-3px);border-color:var(--accent);}
+    .related-banner{height:80px;}
+    .related-body{padding:10px 12px;}
+    .related-title{font-weight:600;font-size:0.82rem;}
+    .related-meta{font-size:0.68rem;color:var(--text2);margin-top:3px;}
+    @media(max-width:900px){.detail-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html">AI Generator</a><a href="dashboard.html">Dashboard</a><a href="concerts.html">Concerts</a><a href="history.html">History</a><a href="anatomy.html">3D Anatomy</a><a href="my-bookings.html">My Bookings</a><a href="profile.html">Profile</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content" id="event-page">
+  <!-- Hero (populated by JS) -->
+  <div class="event-hero" id="event-hero"></div>
+
+  <div class="detail-grid">
+    <!-- LEFT: Details -->
+    <div>
+      <div class="info-block">
+        <h2 style="font-weight:700;margin-bottom:14px;">📋 Event Details</h2>
+        <div class="info-row" id="event-info-row"></div>
+        <div style="margin-top:14px;" id="event-desc"></div>
+      </div>
+
+      <div class="info-block">
+        <h2 style="font-weight:700;margin-bottom:14px;">📍 Venue Information</h2>
+        <div id="venue-info"></div>
+      </div>
+
+      <div class="info-block" id="artist-block" style="display:none;">
+        <h2 style="font-weight:700;margin-bottom:14px;">🎤 About the Artist</h2>
+        <div id="artist-info"></div>
+      </div>
+
+      <!-- Related Events -->
+      <div style="margin-top:24px;">
+        <h3 style="font-weight:700;margin-bottom:4px;">🎶 You Might Also Like</h3>
+        <p style="color:var(--text2);font-size:0.82rem;margin-bottom:10px;">Similar events happening near you</p>
+        <div class="related-grid" id="related-events"></div>
+      </div>
+
+      <div class="hci-badge design-principle" style="margin-top:16px;">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">🎯 Progressive Disclosure</div>
+        <div class="hci-badge-desc">Event details are organized into clear sections — users can scan key info first and dive deeper as needed.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Booking Sidebar -->
+    <div>
+      <div class="booking-summary" id="booking-sidebar">
+        <h3>🎟️ Get Tickets</h3>
+        <div id="ticket-tiers"></div>
+        <div style="margin-top:14px;">
+          <label class="form-label">Number of Tickets</label>
+          <select id="ticket-qty" style="width:100%;" onchange="updateSidebarTotal()">
+            <option value="1">1 Ticket</option><option value="2" selected>2 Tickets</option><option value="3">3 Tickets</option><option value="4">4 Tickets</option><option value="5">5 Tickets</option><option value="6">6 Tickets</option>
+          </select>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+          <div class="booking-summary-row"><span>Subtotal</span><span id="sidebar-subtotal">—</span></div>
+          <div class="booking-summary-row"><span style="color:var(--text3);">Convenience Fee</span><span id="sidebar-fee" style="color:var(--text3);">—</span></div>
+          <div class="booking-summary-row total"><span>Total</span><span id="sidebar-total">—</span></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:14px;" onclick="goToBooking()">Proceed to Seat Selection →</button>
+      </div>
+      <div class="hci-badge usability-principle" style="margin-top:12px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">📊 Visibility of System Status</div>
+        <div class="hci-badge-desc">Real-time price updates as users select ticket type and quantity — no surprises at checkout.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning & live events platform.</p></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Explore</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="concerts.html" style="color:var(--text2);font-size:0.82rem;">Concerts</a><a href="training.html" style="color:var(--text2);font-size:0.82rem;">Training</a><a href="history.html" style="color:var(--text2);font-size:0.82rem;">History</a></div></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Account</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="my-bookings.html" style="color:var(--text2);font-size:0.82rem;">My Bookings</a><a href="profile.html" style="color:var(--text2);font-size:0.82rem;">Profile</a><a href="about.html" style="color:var(--text2);font-size:0.82rem;">About</a></div></div></div><div class="footer-bottom"><span>© 2026 Harmonia</span><span>HCI Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+const GENRE_COLORS = {Rock:'linear-gradient(135deg,#dc2626,#991b1b)',Classical:'linear-gradient(135deg,#7c3aed,#4c1d95)',EDM:'linear-gradient(135deg,#06b6d4,#0e7490)',Folk:'linear-gradient(135deg,#d97706,#92400e)',Jazz:'linear-gradient(135deg,#8b5cf6,#6d28d9)',Pop:'linear-gradient(135deg,#ec4899,#be185d)',Bollywood:'linear-gradient(135deg,#f59e0b,#ea580c)',Sufi:'linear-gradient(135deg,#10b981,#065f46)',Indie:'linear-gradient(135deg,#3b82f6,#1d4ed8)',Festival:'linear-gradient(135deg,#f43f5e,#e11d48)'};
+
+const EVENTS = [
+  {id:1,state:'Maharashtra',city:'Mumbai',title:'Arijit Singh Live in Concert',date:'2026-04-15T19:00',venue:'NSCI Dome',price:2500,genre:'Bollywood',trending:true,desc:'Experience the magic of Arijit Singh live! An unforgettable evening of soulful Bollywood hits and acoustic renditions.',artist:'Arijit Singh — India\'s most streamed artist with over 500 songs.',vipPrice:5000,premPrice:3500,regPrice:2500},
+  {id:2,state:'Maharashtra',city:'Mumbai',title:'The Local Train — Farewell Tour',date:'2026-06-05T18:00',venue:'Jio Garden',price:2000,genre:'Rock',trending:true,desc:'The Local Train\'s final tour. One last ride with the band that defined a generation of Indian indie rock.',vipPrice:4000,premPrice:3000,regPrice:2000},
+  {id:3,state:'Maharashtra',city:'Pune',title:'Nucleya Bass Drop Tour',date:'2026-04-28T21:00',venue:'Mahalaxmi Lawns',price:1800,genre:'EDM',trending:true,desc:'Bass, beats and Bollywood — Nucleya brings his legendary sound system for an epic night.',vipPrice:3500,premPrice:2500,regPrice:1800},
+  {id:4,state:'Maharashtra',city:'Pune',title:'NH7 Weekender',date:'2026-11-15T14:00',venue:'Magarpatta City',price:3500,genre:'Festival',trending:true,desc:'India\'s happiest music festival returns with 30+ artists across 4 stages.',vipPrice:8000,premPrice:5500,regPrice:3500},
+  {id:5,state:'Delhi',city:'New Delhi',title:'AR Rahman World Tour 2026',date:'2026-04-22T18:30',venue:'JLN Stadium',price:3000,genre:'Bollywood',trending:true,desc:'The Mozart of Madras in a spectacular world tour with full orchestra and visual effects.',artist:'A.R. Rahman — Academy Award winner, 6x National Award winner.',vipPrice:6000,premPrice:4500,regPrice:3000},
+  {id:6,state:'Delhi',city:'New Delhi',title:'Anuv Jain Live Under the Stars',date:'2026-06-12T19:30',venue:'Select City Walk',price:1400,genre:'Indie',desc:'An intimate open-air evening with Anuv Jain performing Husn, Baarishein and new unreleased tracks.',vipPrice:2800,premPrice:2000,regPrice:1400},
+  {id:7,state:'Delhi',city:'New Delhi',title:'Delhi Jazz Festival',date:'2026-05-16T18:00',venue:'India Habitat Centre',price:1000,genre:'Jazz',desc:'A curated evening of jazz featuring Indian and international artists.',vipPrice:2500,premPrice:1800,regPrice:1000},
+  {id:8,state:'Karnataka',city:'Bengaluru',title:'Indie Music Festival',date:'2026-05-01T16:00',venue:'Palace Grounds',price:1500,genre:'Indie',trending:true,desc:'Bangalore\'s biggest indie music fest with 20+ bands and food trucks.',vipPrice:3500,premPrice:2500,regPrice:1500},
+  {id:9,state:'Karnataka',city:'Bengaluru',title:'Prateek Kuhad Live',date:'2026-04-20T19:00',venue:'Phoenix Marketcity',price:1800,genre:'Pop',trending:true,desc:'The cold/mess sensation performs his greatest hits in an intimate setting.',vipPrice:3500,premPrice:2500,regPrice:1800},
+  {id:10,state:'Tamil Nadu',city:'Chennai',title:'AR Rahman World Tour 2026',date:'2026-06-22T18:30',venue:'Nehru Indoor Stadium',price:3500,genre:'Bollywood',trending:true,desc:'Chennai leg of AR Rahman\'s epic world tour.',vipPrice:7000,premPrice:5000,regPrice:3500},
+  {id:11,state:'Telangana',city:'Hyderabad',title:'Hyderabad EDM Festival',date:'2026-04-26T21:00',venue:'Hitex Exhibition Centre',price:2000,genre:'EDM',desc:'The biggest electronic music night in Hyderabad.',vipPrice:4000,premPrice:3000,regPrice:2000},
+  {id:12,state:'Rajasthan',city:'Jaipur',title:'Rajasthani Folk Fusion',date:'2026-04-10T18:00',venue:'Albert Hall Lawns',price:900,genre:'Folk',desc:'Traditional Rajasthani folk meets modern fusion in a magical evening under the stars.',vipPrice:2000,premPrice:1500,regPrice:900},
+  {id:13,state:'Rajasthan',city:'Udaipur',title:'Lakeside Music Festival',date:'2026-05-05T18:30',venue:'Fateh Sagar Lake',price:1200,genre:'Folk',desc:'Music by the lake — a serene folk music experience in the city of lakes.',vipPrice:2500,premPrice:1800,regPrice:1200},
+  {id:14,state:'Goa',city:'Panaji',title:'Sunburn Festival 2026',date:'2026-12-28T14:00',venue:'Vagator Beach',price:5000,genre:'EDM',trending:true,desc:'Asia\'s biggest electronic dance music festival returns to Goa.',vipPrice:12000,premPrice:8000,regPrice:5000},
+  {id:15,state:'Goa',city:'Margao',title:'Jazz by the Sea',date:'2026-04-18T19:00',venue:'Ravindra Bhavan',price:1200,genre:'Jazz',desc:'Goan jazz by the seaside with cocktails and sunset views.',vipPrice:2500,premPrice:1800,regPrice:1200},
+  {id:16,state:'West Bengal',city:'Kolkata',title:'Kolkata Jazz Festival',date:'2026-04-10T18:00',venue:'Victoria Memorial Lawns',price:1000,genre:'Jazz',desc:'An evening of jazz in the heart of Kolkata.',vipPrice:2500,premPrice:1500,regPrice:1000},
+  {id:17,state:'Gujarat',city:'Surat',title:'Arijit Singh Live',date:'2026-04-30T19:30',venue:'Sardar Patel Stadium',price:2500,genre:'Bollywood',trending:true,desc:'Arijit Singh performs in Surat for the first time.',vipPrice:5000,premPrice:3500,regPrice:2500},
+  {id:18,state:'Punjab',city:'Ludhiana',title:'Diljit Dosanjh Live',date:'2026-05-30T20:00',venue:'PAU Ground',price:2500,genre:'Pop',trending:true,desc:'The GOAT tour comes to Ludhiana — Diljit Dosanjh live in concert!',artist:'Diljit Dosanjh — global Punjabi superstar.',vipPrice:5000,premPrice:3500,regPrice:2500},
+  {id:19,state:'Kerala',city:'Kochi',title:'Kerala Electronic Music Fest',date:'2026-05-15T20:00',venue:'Bolgatty Palace',price:1400,genre:'EDM',desc:'God\'s own country meets electronic beats.',vipPrice:3000,premPrice:2000,regPrice:1400},
+  {id:20,state:'Uttar Pradesh',city:'Varanasi',title:'Ganga Aarti Musical Evening',date:'2026-05-02T18:00',venue:'Dashashwamedh Ghat',price:600,genre:'Classical',desc:'A spiritual musical journey on the banks of the Ganga.',vipPrice:1500,premPrice:1000,regPrice:600},
+];
+
+let selectedTier = 'regular';
+
+function getEventFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const id = parseInt(params.get('id'));
+  return EVENTS.find(e => e.id === id) || EVENTS[0];
+}
+
+function renderEvent() {
+  const e = getEventFromURL();
+  const bg = GENRE_COLORS[e.genre] || GENRE_COLORS.Pop;
+  const d = new Date(e.date);
+  const dateStr = d.toLocaleDateString('en-IN',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const timeStr = d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+  document.title = `Harmonia — ${e.title}`;
+
+  // Hero
+  document.getElementById('event-hero').innerHTML = `
+    <div class="event-hero-bg" style="background:${bg};"></div>
+    <div class="event-hero-content">
+      <div class="event-hero-chips">
+        <span class="event-hero-chip">${e.genre}</span>
+        <span class="event-hero-chip">📍 ${e.city}, ${e.state}</span>
+        ${e.trending ? '<span class="event-hero-chip">🔥 Trending</span>' : ''}
+      </div>
+      <h1>${e.title}</h1>
+      <p style="color:rgba(255,255,255,0.8);font-size:0.95rem;">${dateStr} • ${timeStr}</p>
+    </div>`;
+
+  // Info row
+  document.getElementById('event-info-row').innerHTML = `
+    <div class="info-item"><div class="info-label">Date</div><div style="font-weight:600;">${dateStr}</div></div>
+    <div class="info-item"><div class="info-label">Time</div><div style="font-weight:600;">${timeStr}</div></div>
+    <div class="info-item"><div class="info-label">Genre</div><div style="font-weight:600;">${e.genre}</div></div>
+    <div class="info-item"><div class="info-label">Starting From</div><div style="font-weight:600;color:var(--emerald);">₹${e.regPrice.toLocaleString()}</div></div>`;
+
+  // Description
+  document.getElementById('event-desc').innerHTML = `<p style="color:var(--text2);font-size:0.88rem;line-height:1.7;">${e.desc || 'An amazing live music experience awaits!'}</p>`;
+
+  // Venue
+  document.getElementById('venue-info').innerHTML = `
+    <div style="font-weight:600;font-size:1rem;margin-bottom:4px;">📍 ${e.venue}</div>
+    <div style="color:var(--text2);font-size:0.85rem;">${e.city}, ${e.state}</div>`;
+
+  // Artist
+  if (e.artist) {
+    document.getElementById('artist-block').style.display = 'block';
+    document.getElementById('artist-info').innerHTML = `<p style="color:var(--text2);font-size:0.88rem;">${e.artist}</p>`;
+  }
+
+  // Ticket tiers
+  document.getElementById('ticket-tiers').innerHTML = `
+    <div class="ticket-tier selected" onclick="selectTier('vip',this)" data-price="${e.vipPrice}">
+      <div class="ticket-tier-dot" style="background:linear-gradient(135deg,#f59e0b,#d97706);"></div>
+      <span class="ticket-tier-name">⭐ VIP</span>
+      <span class="ticket-tier-price">₹${e.vipPrice.toLocaleString()}</span>
+    </div>
+    <div class="ticket-tier" onclick="selectTier('premium',this)" data-price="${e.premPrice}">
+      <div class="ticket-tier-dot" style="background:var(--gradient-primary);"></div>
+      <span class="ticket-tier-name">🔥 Premium</span>
+      <span class="ticket-tier-price">₹${e.premPrice.toLocaleString()}</span>
+    </div>
+    <div class="ticket-tier" onclick="selectTier('regular',this)" data-price="${e.regPrice}">
+      <div class="ticket-tier-dot" style="background:linear-gradient(135deg,var(--sky),#0284c7);"></div>
+      <span class="ticket-tier-name">🎵 Regular</span>
+      <span class="ticket-tier-price">₹${e.regPrice.toLocaleString()}</span>
+    </div>`;
+  selectedTier = 'vip';
+  updateSidebarTotal();
+
+  // Related events
+  const related = EVENTS.filter(r => r.id !== e.id && (r.genre === e.genre || r.city === e.city)).slice(0,4);
+  document.getElementById('related-events').innerHTML = related.map(r => {
+    const rbg = GENRE_COLORS[r.genre] || GENRE_COLORS.Pop;
+    const rd = new Date(r.date).toLocaleDateString('en-IN',{month:'short',day:'numeric'});
+    return `<div class="related-card" onclick="window.location.href='event-details.html?id=${r.id}'">
+      <div class="related-banner" style="background:${rbg};"></div>
+      <div class="related-body">
+        <div class="related-title">${r.title}</div>
+        <div class="related-meta">${rd} • ${r.venue} • ₹${r.regPrice.toLocaleString()}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectTier(tier, el) {
+  selectedTier = tier;
+  document.querySelectorAll('.ticket-tier').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  updateSidebarTotal();
+}
+
+function updateSidebarTotal() {
+  const selected = document.querySelector('.ticket-tier.selected');
+  if (!selected) return;
+  const price = parseInt(selected.dataset.price);
+  const qty = parseInt(document.getElementById('ticket-qty').value);
+  const subtotal = price * qty;
+  const fee = Math.round(subtotal * 0.04);
+  const total = subtotal + fee;
+  document.getElementById('sidebar-subtotal').textContent = `₹${subtotal.toLocaleString()}`;
+  document.getElementById('sidebar-fee').textContent = `₹${fee.toLocaleString()}`;
+  document.getElementById('sidebar-total').textContent = `₹${total.toLocaleString()}`;
+}
+
+function goToBooking() {
+  const e = getEventFromURL();
+  const qty = document.getElementById('ticket-qty').value;
+  window.location.href = `booking.html?id=${e.id}&tier=${selectedTier}&qty=${qty}`;
+}
+
+renderEvent();
+</script>
+</body>
+</html>

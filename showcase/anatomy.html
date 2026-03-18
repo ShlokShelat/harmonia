@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia Showcase — 3D Instrument Anatomy</title>
+  <meta name="description" content="Explore the internal anatomy of musical instruments with interactive 3D-style diagrams.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .anatomy-viewer {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); position: relative;
+      overflow: hidden; height: 460px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .anatomy-canvas {
+      width: 100%; height: 100%;
+    }
+    .part-label {
+      position: absolute; background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; max-width: 200px;
+      box-shadow: var(--shadow); font-size: 0.78rem;
+      opacity: 0; transform: translateY(6px);
+      transition: all .3s; pointer-events: none; z-index: 10;
+    }
+    .part-label.active { opacity: 1; transform: translateY(0); }
+    .part-label-title { font-weight: 700; margin-bottom: 2px; color: var(--accent); }
+    .part-label-desc { color: var(--text2); font-size: 0.72rem; line-height: 1.4; }
+    .hotspot {
+      position: absolute; width: 22px; height: 22px;
+      border-radius: 50%; cursor: pointer; z-index: 5;
+      background: rgba(249,115,22,0.2);
+      border: 2px solid var(--accent);
+      transition: all .2s;
+      animation: hotspotPulse 2s ease-in-out infinite;
+    }
+    .hotspot:hover { background: var(--accent); transform: scale(1.3); }
+    @keyframes hotspotPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(249,115,22,0); }
+    }
+    .info-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+    .info-panel-title { font-weight: 700; margin-bottom: 4px; }
+    .info-panel-desc { color: var(--text2); font-size: 0.82rem; line-height: 1.55; }
+    .part-list-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 6px; cursor: pointer;
+      transition: all .2s;
+    }
+    .part-list-item:hover, .part-list-item.active {
+      border-color: var(--accent); background: rgba(249,115,22,0.04);
+    }
+    .part-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .part-item-name { font-weight: 600; font-size: 0.84rem; }
+    .part-item-role { color: var(--text2); font-size: 0.7rem; }
+    .rotate-controls {
+      display: flex; gap: 8px; margin-top: 12px; justify-content: center;
+    }
+    .rotate-btn {
+      background: var(--card); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 7px 14px; font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    .rotate-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .sound-demo { margin-top: 12px; }
+    .svg-instrument { max-width: 300px; max-height: 380px; transition: transform .6s ease; }
+  </style>
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html">AI Generator</a><a href="dashboard.html">Dashboard</a><a href="concerts.html">Concerts</a><a href="history.html">History</a><a href="anatomy.html" class="active">3D Anatomy</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content">
+  <div class="chip">🔬 Instrument Anatomy</div>
+  <h1 class="section-title"><span class="gradient-text">Explore How Instruments Work</span></h1>
+  <p class="section-sub">Click hotspots to learn about each part — hear how it contributes to the sound.</p>
+
+  <!-- Instrument selector -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="anatomy-tabs">
+    <button class="instr-btn active" onclick="switchAnatomy('piano')">🎹 Piano</button>
+    <button class="instr-btn" onclick="switchAnatomy('guitar')">🎸 Guitar</button>
+    <button class="instr-btn" onclick="switchAnatomy('drums')">🥁 Drums</button>
+    <button class="instr-btn" onclick="switchAnatomy('violin')">🎻 Violin</button>
+  </div>
+  <div class="hci-badge design-principle">
+    <div class="hci-badge-category">Design Principle</div>
+    <div class="hci-badge-title">🔄 Consistency & Standards</div>
+    <div class="hci-badge-desc">Instrument tabs use the same styling and placement as the Training page — transferring learned interaction patterns.</div>
+  </div>
+
+  <div class="grid-2" style="gap:26px;align-items:start;margin-top:16px;">
+    <!-- LEFT: Interactive Viewer -->
+    <div>
+      <div class="anatomy-viewer" id="anatomy-viewer">
+        <svg class="svg-instrument" id="instrument-svg" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="part-label" id="hover-label">
+          <div class="part-label-title" id="label-title">—</div>
+          <div class="part-label-desc" id="label-desc">—</div>
+        </div>
+      </div>
+      <div class="rotate-controls">
+        <button class="rotate-btn" onclick="rotateView(-15)">↺ Rotate Left</button>
+        <button class="rotate-btn" onclick="resetView()">↻ Reset</button>
+        <button class="rotate-btn" onclick="rotateView(15)">↻ Rotate Right</button>
+        <button class="rotate-btn" onclick="toggleXray()">🔬 X-Ray</button>
+      </div>
+      <div class="hci-badge usability-principle" style="margin-top:12px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">👆 Direct Manipulation</div>
+        <div class="hci-badge-desc">Users rotate and explore the instrument directly — immediate visual response creates a tangible, engaging experience.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Parts info -->
+    <div>
+      <h3 style="font-weight:700;margin-bottom:12px;" id="parts-heading">🎹 Piano Parts</h3>
+      <div id="parts-list"></div>
+      <div class="hci-badge design-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">📖 Recognition over Recall</div>
+        <div class="hci-badge-desc">Parts list shows all components at a glance with color dots — users recognize parts without memorizing names.</div>
+      </div>
+
+      <div id="selected-part-info" class="info-panel" style="margin-top:14px;">
+        <div class="info-panel-title" id="info-title">Click a part to learn more</div>
+        <div class="info-panel-desc" id="info-desc">Select any component from the list or click a hotspot on the diagram to see detailed information about how it works.</div>
+        <div class="sound-demo" id="sound-demo"></div>
+      </div>
+      <div class="hci-badge usability-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">🎧 Multimodal Learning</div>
+        <div class="hci-badge-desc">Visual diagram + text description + audio demo engage multiple senses — accommodating different learning styles.</div>
+      </div>
+
+      <div class="hci-badge design-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">🔍 Affordance & Signifiers</div>
+        <div class="hci-badge-desc">Pulsing hotspots signal interactivity — users know immediately that parts are clickable without instructions.</div>
+      </div>
+
+      <div class="hci-badge usability-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">♿ Accessible Navigation</div>
+        <div class="hci-badge-desc">Parts list provides keyboard-navigable alternative to hotspot clicking — ensuring accessibility for users who cannot use a mouse.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning platform.</p></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Pages</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="training.html" style="color:var(--text2);font-size:0.82rem;">Training</a><a href="ai-generator.html" style="color:var(--text2);font-size:0.82rem;">AI Generator</a><a href="dashboard.html" style="color:var(--text2);font-size:0.82rem;">Dashboard</a><a href="concerts.html" style="color:var(--text2);font-size:0.82rem;">Concerts</a><a href="history.html" style="color:var(--text2);font-size:0.82rem;">History</a><a href="anatomy.html" style="color:var(--text2);font-size:0.82rem;">3D Anatomy</a></div></div></div><div class="footer-bottom"><span>© 2025 Harmonia Showcase</span><span>HCI — Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+
+const INSTRUMENTS = {
+  piano: {
+    icon:'🎹', title:'Piano Parts',
+    parts: [
+      {name:'Keys (White)',color:'var(--accent)',x:100,y:280,desc:'88 keys — 52 white keys produce natural notes (A-G). Each key is a lever that triggers a hammer mechanism.',sound:{freq:261.63,wave:'sine'}},
+      {name:'Keys (Black)',color:'var(--coral)',x:140,y:260,desc:'36 black keys produce sharps and flats. Raised for ergonomic distinction from white keys.',sound:{freq:277.18,wave:'sine'}},
+      {name:'Hammers',color:'var(--amber)',x:150,y:180,desc:'Felt-covered hammers strike the strings when a key is pressed. Each hammer must fall back immediately to allow the string to vibrate.',sound:{freq:329.63,wave:'triangle'}},
+      {name:'Strings',color:'var(--emerald)',x:150,y:120,desc:'Over 200 steel strings stretched across the frame. Bass strings are wound with copper wire for deeper tones.',sound:{freq:440,wave:'sine'}},
+      {name:'Soundboard',color:'var(--sky)',x:150,y:60,desc:'Large wooden board that amplifies string vibrations. Made from spruce for its excellent resonance.',sound:{freq:196,wave:'sine'}},
+      {name:'Pedals',color:'var(--violet)',x:100,y:370,desc:'Three pedals: sustain (right), sostenuto (middle), una corda (left). Sustain lifts all dampers to let notes ring.'},
+    ],
+    svg: `<rect x="40" y="30" width="220" height="300" rx="8" fill="none" stroke="var(--text3)" stroke-width="1.5"/>
+      <rect x="50" y="40" width="200" height="60" rx="4" fill="var(--bg)" stroke="var(--accent)" stroke-width="0.5" opacity="0.4"/>
+      <text x="150" y="75" text-anchor="middle" fill="var(--text3)" font-size="10" font-family="var(--font-mono)">STRINGS</text>
+      <rect x="50" y="110" width="200" height="40" rx="4" fill="var(--bg)" stroke="var(--amber)" stroke-width="0.5" opacity="0.4"/>
+      <text x="150" y="135" text-anchor="middle" fill="var(--text3)" font-size="10" font-family="var(--font-mono)">HAMMERS</text>
+      <g id="piano-keys-svg"></g>
+      <rect x="85" y="330" width="20" height="30" rx="3" fill="var(--violet)" opacity="0.5"/>
+      <rect x="140" y="330" width="20" height="30" rx="3" fill="var(--violet)" opacity="0.5"/>
+      <rect x="195" y="330" width="20" height="30" rx="3" fill="var(--violet)" opacity="0.5"/>
+      <text x="150" y="380" text-anchor="middle" fill="var(--text3)" font-size="10" font-family="var(--font-mono)">PEDALS</text>`
+  },
+  guitar: {
+    icon:'🎸', title:'Guitar Parts',
+    parts: [
+      {name:'Headstock',color:'var(--accent)',x:150,y:30,desc:'Houses the tuning pegs. Each peg adjusts string tension to tune each string to the correct pitch.',sound:{freq:329.63,wave:'triangle'}},
+      {name:'Tuning Pegs',color:'var(--coral)',x:180,y:50,desc:'6 tuning machines, one per string. Turn clockwise to tighten (raise pitch) or counter-clockwise to loosen.',sound:{freq:392,wave:'triangle'}},
+      {name:'Nut',color:'var(--amber)',x:150,y:80,desc:'A small grooved piece at the top of the fretboard. Sets string spacing and string height at the headstock end.'},
+      {name:'Fretboard',color:'var(--emerald)',x:150,y:160,desc:'Usually rosewood or maple. 19-24 metal frets divide the neck into semitone intervals.',sound:{freq:440,wave:'triangle'}},
+      {name:'Sound Hole',color:'var(--sky)',x:150,y:270,desc:'Round opening in the body that projects sound outward. Shape affects tone and projection.',sound:{freq:196,wave:'triangle'}},
+      {name:'Bridge',color:'var(--violet)',x:150,y:330,desc:'Transmits string vibration to the soundboard. Position determines intonation accuracy.'},
+    ],
+    svg: `<rect x="125" y="10" width="50" height="50" rx="5" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="150" y="38" text-anchor="middle" fill="var(--text3)" font-size="8" font-family="var(--font-mono)">HEAD</text>
+      <rect x="135" y="65" width="30" height="160" rx="4" fill="none" stroke="var(--emerald)" stroke-width="1.5"/>
+      <line x1="140" y1="82" x2="160" y2="82" stroke="var(--text3)" stroke-width="0.5"/>
+      <line x1="140" y1="102" x2="160" y2="102" stroke="var(--text3)" stroke-width="0.5"/>
+      <line x1="140" y1="125" x2="160" y2="125" stroke="var(--text3)" stroke-width="0.5"/>
+      <line x1="140" y1="150" x2="160" y2="150" stroke="var(--text3)" stroke-width="0.5"/>
+      <line x1="140" y1="178" x2="160" y2="178" stroke="var(--text3)" stroke-width="0.5"/>
+      <line x1="140" y1="208" x2="160" y2="208" stroke="var(--text3)" stroke-width="0.5"/>
+      <text x="150" y="145" text-anchor="middle" fill="var(--text3)" font-size="8" font-family="var(--font-mono)">NECK</text>
+      <ellipse cx="150" cy="290" rx="70" ry="90" fill="none" stroke="var(--text3)" stroke-width="1.5"/>
+      <circle cx="150" cy="270" r="22" fill="none" stroke="var(--sky)" stroke-width="1.5"/>
+      <text x="150" y="274" text-anchor="middle" fill="var(--sky)" font-size="7" font-family="var(--font-mono)">HOLE</text>
+      <line x1="140" y1="60" x2="140" y2="340" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <line x1="145" y1="60" x2="145" y2="340" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <line x1="150" y1="60" x2="150" y2="340" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <line x1="155" y1="60" x2="155" y2="340" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <line x1="160" y1="60" x2="160" y2="340" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <rect x="120" y="330" width="60" height="14" rx="3" fill="none" stroke="var(--violet)" stroke-width="1"/>
+      <text x="150" y="340" text-anchor="middle" fill="var(--violet)" font-size="7" font-family="var(--font-mono)">BRIDGE</text>`
+  },
+  drums: {
+    icon:'🥁', title:'Drums Parts',
+    parts: [
+      {name:'Snare Drum',color:'var(--accent)',x:150,y:200,desc:'Central drum with metal wires (snares) stretched across the bottom head. Creates a sharp, crisp sound.',sound:{freq:200,wave:'triangle'}},
+      {name:'Bass Drum',color:'var(--coral)',x:150,y:320,desc:'Largest drum, played with a foot pedal. Provides the deep, low-frequency foundation of the beat.',sound:{freq:60,wave:'sine'}},
+      {name:'Hi-Hat',color:'var(--amber)',x:60,y:140,desc:'Two cymbals on a stand, controlled by a foot pedal. Open/closed positions create different articulations.',sound:{freq:800,wave:'square'}},
+      {name:'Tom-Toms',color:'var(--emerald)',x:200,y:140,desc:'Mounted drums of varying sizes. Tuned to different pitches for fills and melodic patterns.',sound:{freq:150,wave:'triangle'}},
+      {name:'Crash Cymbal',color:'var(--sky)',x:80,y:60,desc:'Thin cymbal that produces a loud, shimmering crash. Used for accents and transitions.',sound:{freq:600,wave:'sawtooth'}},
+      {name:'Ride Cymbal',color:'var(--violet)',x:220,y:80,desc:'Heavier cymbal for sustained, shimmering patterns. The bell at the center produces a distinct ping.',sound:{freq:1000,wave:'sine'}},
+    ],
+    svg: `<circle cx="80" cy="70" r="30" fill="none" stroke="var(--sky)" stroke-width="1.5"/>
+      <text x="80" y="74" text-anchor="middle" fill="var(--sky)" font-size="7" font-family="var(--font-mono)">CRASH</text>
+      <circle cx="220" cy="90" r="35" fill="none" stroke="var(--violet)" stroke-width="1.5"/>
+      <text x="220" y="94" text-anchor="middle" fill="var(--violet)" font-size="7" font-family="var(--font-mono)">RIDE</text>
+      <ellipse cx="60" cy="160" rx="25" ry="8" fill="none" stroke="var(--amber)" stroke-width="1.5"/>
+      <ellipse cx="60" cy="155" rx="25" ry="8" fill="none" stroke="var(--amber)" stroke-width="1"/>
+      <text x="60" y="180" text-anchor="middle" fill="var(--amber)" font-size="7" font-family="var(--font-mono)">HI-HAT</text>
+      <line x1="60" y1="170" x2="60" y2="380" stroke="var(--text3)" stroke-width="1"/>
+      <ellipse cx="200" cy="150" rx="28" ry="18" fill="none" stroke="var(--emerald)" stroke-width="1.5"/>
+      <text x="200" y="154" text-anchor="middle" fill="var(--emerald)" font-size="7" font-family="var(--font-mono)">TOM</text>
+      <ellipse cx="150" cy="220" rx="40" ry="20" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="150" y="224" text-anchor="middle" fill="var(--accent)" font-size="7" font-family="var(--font-mono)">SNARE</text>
+      <ellipse cx="150" cy="330" rx="55" ry="35" fill="none" stroke="var(--coral)" stroke-width="1.5"/>
+      <text x="150" y="334" text-anchor="middle" fill="var(--coral)" font-size="8" font-family="var(--font-mono)">BASS</text>`
+  },
+  violin: {
+    icon:'🎻', title:'Violin Parts',
+    parts: [
+      {name:'Scroll',color:'var(--accent)',x:150,y:20,desc:'Decorative spiral carving at the top. Purely ornamental but a signature of traditional craftsmanship.'},
+      {name:'Pegs',color:'var(--coral)',x:170,y:55,desc:'Four wooden tuning pegs insert into the peg box. Turn to adjust string tension and pitch.',sound:{freq:440,wave:'sine'}},
+      {name:'Fingerboard',color:'var(--amber)',x:150,y:140,desc:'Unfretted ebony surface. Players press strings against it to change pitches — no frets means continuous pitch control.',sound:{freq:659.25,wave:'sine'}},
+      {name:'F-Holes',color:'var(--emerald)',x:130,y:260,desc:'Two f-shaped openings that project sound outward. Their shape, size, and position affect the violin\'s tonal quality.',sound:{freq:293.66,wave:'sine'}},
+      {name:'Bridge',color:'var(--sky)',x:150,y:290,desc:'Curved maple piece that transmits string vibrations to the body. Its placement is critical for tone.',sound:{freq:392,wave:'sine'}},
+      {name:'Chin Rest',color:'var(--violet)',x:170,y:340,desc:'Attached to the lower left. Provides a comfortable anchor point for the player\'s chin. Usually ebony or plastic.'},
+    ],
+    svg: `<path d="M150 5 C155 5 160 15 160 30 L160 40 C165 40 170 45 170 55 C170 65 165 70 160 70 L160 80 L140 80 L140 70 C135 70 130 65 130 55 C130 45 135 40 140 40 L140 30 C140 15 145 5 150 5Z" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="150" y="22" text-anchor="middle" fill="var(--accent)" font-size="7" font-family="var(--font-mono)">SCROLL</text>
+      <rect x="138" y="82" width="24" height="140" rx="3" fill="none" stroke="var(--amber)" stroke-width="1.5"/>
+      <text x="150" y="155" text-anchor="middle" fill="var(--amber)" font-size="7" font-family="var(--font-mono)">NECK</text>
+      <path d="M110 230 C100 250 95 280 100 310 C105 340 120 355 150 360 C180 355 195 340 200 310 C205 280 200 250 190 230 C185 240 175 245 150 245 C125 245 115 240 110 230Z" fill="none" stroke="var(--text3)" stroke-width="1.5"/>
+      <text x="128" y="275" text-anchor="middle" fill="var(--emerald)" font-size="14" font-family="serif" font-style="italic">f</text>
+      <text x="172" y="275" text-anchor="middle" fill="var(--emerald)" font-size="14" font-family="serif" font-style="italic">f</text>
+      <line x1="130" y1="290" x2="170" y2="290" stroke="var(--sky)" stroke-width="2"/>
+      <text x="150" y="305" text-anchor="middle" fill="var(--sky)" font-size="7" font-family="var(--font-mono)">BRIDGE</text>
+      <ellipse cx="165" cy="340" rx="22" ry="12" fill="none" stroke="var(--violet)" stroke-width="1"/>
+      <text x="165" y="344" text-anchor="middle" fill="var(--violet)" font-size="6" font-family="var(--font-mono)">CHIN</text>
+      <line x1="143" y1="72" x2="143" y2="330" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <line x1="148" y1="72" x2="148" y2="330" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <line x1="153" y1="72" x2="153" y2="330" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>
+      <line x1="158" y1="72" x2="158" y2="330" stroke="var(--text3)" stroke-width="0.3" opacity="0.5"/>`
+  }
+};
+
+let currentAnatomy = 'piano', currentRotation = 0, xrayMode = false;
+
+function switchAnatomy(id) {
+  currentAnatomy = id; currentRotation = 0; xrayMode = false;
+  document.querySelectorAll('#anatomy-tabs .instr-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`#anatomy-tabs .instr-btn:nth-child(${['piano','guitar','drums','violin'].indexOf(id)+1})`).classList.add('active');
+  renderAnatomy();
+  showToast(`Viewing ${INSTRUMENTS[id].icon} ${id.charAt(0).toUpperCase()+id.slice(1)}`);
+}
+
+function renderAnatomy() {
+  const instr = INSTRUMENTS[currentAnatomy];
+  document.getElementById('parts-heading').textContent = `${instr.icon} ${instr.title}`;
+  // SVG
+  const svg = document.getElementById('instrument-svg');
+  svg.innerHTML = instr.svg;
+  svg.style.transform = `rotate(${currentRotation}deg)`;
+  svg.style.opacity = xrayMode ? '0.5' : '1';
+  // Remove old hotspots
+  document.querySelectorAll('.hotspot').forEach(h => h.remove());
+  // Add hotspots
+  const viewer = document.getElementById('anatomy-viewer');
+  instr.parts.forEach((part, i) => {
+    const hs = document.createElement('div');
+    hs.className = 'hotspot';
+    hs.style.left = (part.x / 300 * 100) + '%';
+    hs.style.top = (part.y / 400 * 100) + '%';
+    hs.style.borderColor = part.color;
+    hs.style.background = part.color.replace(')', ',0.2)').replace('var(','rgba(');
+    hs.title = part.name;
+    hs.addEventListener('click', () => selectPart(i));
+    hs.addEventListener('mouseenter', () => {
+      const label = document.getElementById('hover-label');
+      label.classList.add('active');
+      document.getElementById('label-title').textContent = part.name;
+      document.getElementById('label-desc').textContent = part.desc.substring(0, 60) + '...';
+      label.style.left = Math.min(65, (part.x / 300 * 100)) + '%';
+      label.style.top = Math.max(5, (part.y / 400 * 100) - 15) + '%';
+    });
+    hs.addEventListener('mouseleave', () => {
+      document.getElementById('hover-label').classList.remove('active');
+    });
+    viewer.appendChild(hs);
+  });
+  // Parts list
+  const list = document.getElementById('parts-list');
+  list.innerHTML = instr.parts.map((p, i) =>
+    `<div class="part-list-item" onclick="selectPart(${i})" tabindex="0" role="button" aria-label="View ${p.name}">
+      <div class="part-dot" style="background:${p.color};"></div>
+      <div><div class="part-item-name">${p.name}</div><div class="part-item-role">${p.desc.substring(0,50)}...</div></div>
+    </div>`
+  ).join('');
+  // Reset info
+  document.getElementById('info-title').textContent = 'Click a part to learn more';
+  document.getElementById('info-desc').textContent = 'Select any component from the list or click a hotspot to see detailed information.';
+  document.getElementById('sound-demo').innerHTML = '';
+}
+
+function selectPart(idx) {
+  const instr = INSTRUMENTS[currentAnatomy];
+  const part = instr.parts[idx];
+  document.getElementById('info-title').textContent = part.name;
+  document.getElementById('info-desc').textContent = part.desc;
+  // Highlight in list
+  document.querySelectorAll('.part-list-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+  // Sound demo
+  const demo = document.getElementById('sound-demo');
+  if (part.sound) {
+    demo.innerHTML = `<button class="btn btn-primary" style="font-size:0.78rem;padding:6px 14px;margin-top:8px;" onclick="playTone(${part.sound.freq},'${part.sound.wave}',1.5,0.15)">🔊 Hear this part</button>`;
+  } else {
+    demo.innerHTML = '<div style="color:var(--text3);font-size:0.72rem;margin-top:6px;">No audio demo for this part</div>';
+  }
+  showToast(`📍 ${part.name}`);
+}
+
+function rotateView(deg) {
+  currentRotation += deg;
+  document.getElementById('instrument-svg').style.transform = `rotate(${currentRotation}deg)`;
+}
+
+function resetView() {
+  currentRotation = 0; xrayMode = false;
+  document.getElementById('instrument-svg').style.transform = 'rotate(0deg)';
+  document.getElementById('instrument-svg').style.opacity = '1';
+}
+
+function toggleXray() {
+  xrayMode = !xrayMode;
+  document.getElementById('instrument-svg').style.opacity = xrayMode ? '0.35' : '1';
+  showToast(xrayMode ? '🔬 X-Ray ON' : '🔬 X-Ray OFF');
+}
+
+renderAnatomy();
+</script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia — Concerts & Shows</title>
+  <meta name="description" content="Find and book live music concerts across India, or list your own performance.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .concerts-hero{position:relative;padding:50px 0 30px;text-align:center;}
+    .concerts-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 30%,rgba(249,115,22,0.08),transparent 70%);pointer-events:none;}
+    .results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+    .results-count{font-size:0.82rem;color:var(--text2);}
+    .events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+    .genre-banner{position:absolute;inset:0;transition:transform .4s var(--transition-smooth);}
+    .event-card:hover .genre-banner{transform:scale(1.05);}
+    .list-show-section{margin-top:40px;padding:40px 0;border-top:1px solid var(--border);}
+    .preview-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-width:380px;margin:0 auto;}
+    .price-slider{appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none;padding:0;border:none;width:100%;}
+    .price-slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;}
+    .ticket-cat-row{display:flex;gap:10px;align-items:center;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:8px;}
+    .ticket-cat-row input{width:auto;flex:1;}
+    .ticket-cat-label{font-size:0.78rem;font-weight:600;min-width:70px;}
+  </style>
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html">AI Generator</a><a href="dashboard.html">Dashboard</a><a href="concerts.html" class="active">Concerts</a><a href="history.html">History</a><a href="anatomy.html">3D Anatomy</a><a href="my-bookings.html">My Bookings</a><a href="profile.html">Profile</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content">
+  <!-- HERO -->
+  <div class="concerts-hero">
+    <div class="chip">🎟️ Live Events</div>
+    <h1 class="section-title"><span class="gradient-text">Concerts & Shows</span></h1>
+    <p class="section-sub" style="max-width:560px;margin:0 auto;">Discover electrifying live music across India. Book your spot or list your own show.</p>
+  </div>
+
+  <!-- TAB TOGGLE -->
+  <div class="tab-bar" style="justify-content:center;border-bottom:none;gap:4px;margin-bottom:24px;">
+    <button class="tab-btn active" id="tab-find" onclick="switchTab('find')">🔍 Find Shows</button>
+    <button class="tab-btn" id="tab-list" onclick="switchTab('list')">🌟 List Your Show</button>
+  </div>
+
+  <!-- ═══ FIND SHOWS TAB ═══ -->
+  <div id="panel-find">
+    <!-- Search -->
+    <div class="search-bar" style="max-width:600px;margin:0 auto 16px;">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search by artist, venue, or city..." oninput="applyFilters()">
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar" style="justify-content:center;">
+      <button class="filter-chip active" onclick="setGenre('all',this)">All Genres</button>
+      <button class="filter-chip" onclick="setGenre('Rock',this)">🎸 Rock</button>
+      <button class="filter-chip" onclick="setGenre('Classical',this)">🎻 Classical</button>
+      <button class="filter-chip" onclick="setGenre('EDM',this)">🎧 EDM</button>
+      <button class="filter-chip" onclick="setGenre('Folk',this)">🪕 Folk</button>
+      <button class="filter-chip" onclick="setGenre('Jazz',this)">🎷 Jazz</button>
+      <button class="filter-chip" onclick="setGenre('Pop',this)">🎤 Pop</button>
+      <button class="filter-chip" onclick="setGenre('Bollywood',this)">🌟 Bollywood</button>
+    </div>
+
+    <!-- Sort + State Filter Row -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;">
+      <select class="sort-select" id="sort-select" onchange="applyFilters()">
+        <option value="date">📅 Sort: Date</option>
+        <option value="price-low">💰 Price: Low → High</option>
+        <option value="price-high">💰 Price: High → Low</option>
+        <option value="trending">🔥 Trending</option>
+      </select>
+      <select class="sort-select" id="state-filter" onchange="applyFilters()">
+        <option value="">📍 All States</option>
+      </select>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+        <span style="font-size:0.72rem;color:var(--text3);">Max ₹</span>
+        <input type="range" class="price-slider" id="price-slider" min="0" max="6000" value="6000" step="100" oninput="updatePriceLabel()" style="width:120px;">
+        <span id="price-label" style="font-size:0.72rem;color:var(--text2);min-width:50px;">₹6,000</span>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-header">
+      <span class="results-count" id="results-count">Showing 0 events</span>
+    </div>
+    <div class="events-grid" id="events-grid"></div>
+  </div>
+
+  <!-- ═══ LIST YOUR SHOW TAB ═══ -->
+  <div id="panel-list" style="display:none;">
+    <div style="max-width:600px;margin:0 auto;">
+      <!-- Step Indicators -->
+      <div class="form-steps">
+        <div class="form-step-indicator active" id="step-ind-1">① Event Details</div>
+        <div class="form-step-indicator" id="step-ind-2">② Tickets & Pricing</div>
+        <div class="form-step-indicator" id="step-ind-3">③ Preview & Publish</div>
+      </div>
+
+      <!-- Step 1: Event Details -->
+      <div class="form-step-content active" id="step-1">
+        <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+          <h2 style="font-weight:700;font-size:1.1rem;margin-bottom:4px;">📋 Event Details</h2>
+          <div>
+            <label class="form-label">Event Title *</label>
+            <input type="text" id="ls-title" placeholder="e.g. The Midnight Jazz Session">
+          </div>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;"><label class="form-label">State / UT *</label><select id="ls-state" onchange="lsUpdateCities()"><option value="">-- Select --</option></select></div>
+            <div style="flex:1;"><label class="form-label">City *</label><select id="ls-city" disabled><option value="">-- State first --</option></select></div>
+          </div>
+          <div><label class="form-label">Venue *</label><input type="text" id="ls-venue" placeholder="e.g. Palace Grounds"></div>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;"><label class="form-label">📅 Date *</label><input type="date" id="ls-date"></div>
+            <div style="flex:1;">
+              <label class="form-label">🕐 Time *</label>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <select id="ls-hour" style="flex:1;text-align:center;"><option value="">Hr</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option selected>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option></select>
+                <span style="font-weight:700;color:var(--text2);">:</span>
+                <select id="ls-minute" style="flex:1;text-align:center;"><option selected>00</option><option>15</option><option>30</option><option>45</option></select>
+                <div style="display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border);">
+                  <button type="button" id="ls-pm" onclick="lsAMPM('PM')" style="padding:6px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;border:none;">PM</button>
+                  <button type="button" id="ls-am" onclick="lsAMPM('AM')" style="padding:6px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;background:var(--bg3);color:var(--text2);border:none;">AM</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div><label class="form-label">Genre</label>
+            <select id="ls-genre"><option>Rock</option><option>Classical</option><option>EDM</option><option>Folk</option><option>Jazz</option><option selected>Pop</option><option>Bollywood</option><option>Sufi</option><option>Indie</option></select>
+          </div>
+          <div><label class="form-label">Description</label><textarea id="ls-desc" rows="3" placeholder="Tell attendees what to expect..."></textarea></div>
+          <div class="form-actions"><div></div><button class="btn btn-primary" onclick="lsNext(2)">Next: Tickets →</button></div>
+        </div>
+        <div class="hci-badge design-principle" style="margin-top:12px;">
+          <div class="hci-badge-category">Design Principle</div>
+          <div class="hci-badge-title">🛡️ Error Prevention</div>
+          <div class="hci-badge-desc">Cascading dropdowns (state→city) and required fields prevent invalid data entry.</div>
+        </div>
+      </div>
+
+      <!-- Step 2: Tickets & Pricing -->
+      <div class="form-step-content" id="step-2">
+        <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+          <h2 style="font-weight:700;font-size:1.1rem;margin-bottom:4px;">🎫 Ticket Categories</h2>
+          <p style="color:var(--text2);font-size:0.8rem;">Set pricing for each category. Leave empty to skip a tier.</p>
+          <div class="ticket-cat-row"><span class="ticket-cat-label" style="color:#f59e0b;">⭐ VIP</span><input type="number" id="ls-vip-price" placeholder="Price ₹" min="0" step="50"><input type="number" id="ls-vip-qty" placeholder="Seats" min="0" style="max-width:80px;"></div>
+          <div class="ticket-cat-row"><span class="ticket-cat-label" style="color:var(--accent);">🔥 Premium</span><input type="number" id="ls-prem-price" placeholder="Price ₹" min="0" step="50"><input type="number" id="ls-prem-qty" placeholder="Seats" min="0" style="max-width:80px;"></div>
+          <div class="ticket-cat-row"><span class="ticket-cat-label" style="color:var(--sky);">🎵 Regular</span><input type="number" id="ls-reg-price" placeholder="Price ₹" min="0" step="50"><input type="number" id="ls-reg-qty" placeholder="Seats" min="0" style="max-width:80px;"></div>
+          <div class="form-actions"><button class="btn btn-secondary" onclick="lsNext(1)">← Back</button><button class="btn btn-primary" onclick="lsNext(3)">Preview →</button></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Preview -->
+      <div class="form-step-content" id="step-3">
+        <h2 style="font-weight:700;font-size:1.1rem;margin-bottom:14px;text-align:center;">👀 Preview Your Event</h2>
+        <div class="preview-card" id="preview-card"></div>
+        <div class="form-actions" style="max-width:380px;margin:20px auto 0;">
+          <button class="btn btn-secondary" onclick="lsNext(2)">← Edit</button>
+          <button class="btn btn-emerald" onclick="publishShow()">🌟 Publish Show</button>
+        </div>
+        <div class="hci-badge usability-principle" style="margin-top:12px;">
+          <div class="hci-badge-category">Universal Usability</div>
+          <div class="hci-badge-title">✅ Confirmation Before Action</div>
+          <div class="hci-badge-desc">Preview step lets users review before publishing — preventing accidental submissions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning & live events platform.</p></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Explore</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="training.html" style="color:var(--text2);font-size:0.82rem;">Training</a><a href="ai-generator.html" style="color:var(--text2);font-size:0.82rem;">AI Generator</a><a href="concerts.html" style="color:var(--text2);font-size:0.82rem;">Concerts</a><a href="history.html" style="color:var(--text2);font-size:0.82rem;">History</a></div></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Account</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="my-bookings.html" style="color:var(--text2);font-size:0.82rem;">My Bookings</a><a href="profile.html" style="color:var(--text2);font-size:0.82rem;">Profile</a><a href="about.html" style="color:var(--text2);font-size:0.82rem;">About</a></div></div></div><div class="footer-bottom"><span>© 2026 Harmonia</span><span>HCI Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+
+/* ── GENRE BANNERS (CSS gradients) ── */
+const GENRE_COLORS = {
+  Rock:'linear-gradient(135deg,#dc2626,#991b1b)',
+  Classical:'linear-gradient(135deg,#7c3aed,#4c1d95)',
+  EDM:'linear-gradient(135deg,#06b6d4,#0e7490)',
+  Folk:'linear-gradient(135deg,#d97706,#92400e)',
+  Jazz:'linear-gradient(135deg,#8b5cf6,#6d28d9)',
+  Pop:'linear-gradient(135deg,#ec4899,#be185d)',
+  Bollywood:'linear-gradient(135deg,#f59e0b,#ea580c)',
+  Sufi:'linear-gradient(135deg,#10b981,#065f46)',
+  Indie:'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+  Festival:'linear-gradient(135deg,#f43f5e,#e11d48)',
+};
+
+/* ── ENHANCED SAMPLE DATA ── */
+const EVENTS = [
+  {id:1,state:'Maharashtra',city:'Mumbai',title:'Arijit Singh Live in Concert',date:'2026-04-15T19:00',venue:'NSCI Dome',price:2500,genre:'Bollywood',trending:true},
+  {id:2,state:'Maharashtra',city:'Mumbai',title:'The Local Train — Farewell Tour',date:'2026-06-05T18:00',venue:'Jio Garden',price:2000,genre:'Rock',trending:true},
+  {id:3,state:'Maharashtra',city:'Pune',title:'Nucleya Bass Drop Tour',date:'2026-04-28T21:00',venue:'Mahalaxmi Lawns',price:1800,genre:'EDM',trending:true},
+  {id:4,state:'Maharashtra',city:'Pune',title:'NH7 Weekender',date:'2026-11-15T14:00',venue:'Magarpatta City',price:3500,genre:'Festival',trending:true},
+  {id:5,state:'Delhi',city:'New Delhi',title:'AR Rahman World Tour 2026',date:'2026-04-22T18:30',venue:'JLN Stadium',price:3000,genre:'Bollywood',trending:true},
+  {id:6,state:'Delhi',city:'New Delhi',title:'Anuv Jain Live Under the Stars',date:'2026-06-12T19:30',venue:'Select City Walk',price:1400,genre:'Indie',trending:false},
+  {id:7,state:'Delhi',city:'New Delhi',title:'Delhi Jazz Festival',date:'2026-05-16T18:00',venue:'India Habitat Centre',price:1000,genre:'Jazz',trending:false},
+  {id:8,state:'Karnataka',city:'Bengaluru',title:'Indie Music Festival',date:'2026-05-01T16:00',venue:'Palace Grounds',price:1500,genre:'Indie',trending:true},
+  {id:9,state:'Karnataka',city:'Bengaluru',title:'Prateek Kuhad Live',date:'2026-04-20T19:00',venue:'Phoenix Marketcity',price:1800,genre:'Pop',trending:true},
+  {id:10,state:'Tamil Nadu',city:'Chennai',title:'AR Rahman World Tour 2026',date:'2026-06-22T18:30',venue:'Nehru Indoor Stadium',price:3500,genre:'Bollywood',trending:true},
+  {id:11,state:'Telangana',city:'Hyderabad',title:'Hyderabad EDM Festival',date:'2026-04-26T21:00',venue:'Hitex Exhibition Centre',price:2000,genre:'EDM',trending:false},
+  {id:12,state:'Rajasthan',city:'Jaipur',title:'Rajasthani Folk Fusion',date:'2026-04-10T18:00',venue:'Albert Hall Lawns',price:900,genre:'Folk',trending:false},
+  {id:13,state:'Rajasthan',city:'Udaipur',title:'Lakeside Music Festival',date:'2026-05-05T18:30',venue:'Fateh Sagar Lake',price:1200,genre:'Folk',trending:false},
+  {id:14,state:'Goa',city:'Panaji',title:'Sunburn Festival 2026',date:'2026-12-28T14:00',venue:'Vagator Beach',price:5000,genre:'EDM',trending:true},
+  {id:15,state:'Goa',city:'Margao',title:'Jazz by the Sea',date:'2026-04-18T19:00',venue:'Ravindra Bhavan',price:1200,genre:'Jazz',trending:false},
+  {id:16,state:'West Bengal',city:'Kolkata',title:'Kolkata Jazz Festival',date:'2026-04-10T18:00',venue:'Victoria Memorial Lawns',price:1000,genre:'Jazz',trending:false},
+  {id:17,state:'Gujarat',city:'Surat',title:'Arijit Singh Live',date:'2026-04-30T19:30',venue:'Sardar Patel Stadium',price:2500,genre:'Bollywood',trending:true},
+  {id:18,state:'Punjab',city:'Ludhiana',title:'Diljit Dosanjh Live',date:'2026-05-30T20:00',venue:'PAU Ground',price:2500,genre:'Pop',trending:true},
+  {id:19,state:'Kerala',city:'Kochi',title:'Kerala Electronic Music Fest',date:'2026-05-15T20:00',venue:'Bolgatty Palace',price:1400,genre:'EDM',trending:false},
+  {id:20,state:'Uttar Pradesh',city:'Varanasi',title:'Ganga Aarti Musical Evening',date:'2026-05-02T18:00',venue:'Dashashwamedh Ghat',price:600,genre:'Classical',trending:false},
+  {id:21,state:'Madhya Pradesh',city:'Bhopal',title:'Sufi Night by the Lake',date:'2026-05-08T19:00',venue:'Upper Lake Promenade',price:800,genre:'Sufi',trending:false},
+  {id:22,state:'Himachal Pradesh',city:'Manali',title:'Mountain Music Festival',date:'2026-06-20T15:00',venue:'Solang Valley',price:1200,genre:'Rock',trending:false},
+  {id:23,state:'Meghalaya',city:'Shillong',title:'Cherry Blossom Music Fest',date:'2026-11-10T15:00',venue:'Ward Lake',price:1200,genre:'Rock',trending:false},
+  {id:24,state:'Nagaland',city:'Dimapur',title:'Hornbill Music Festival',date:'2026-12-05T14:00',venue:'Kisama Heritage Village',price:1500,genre:'Folk',trending:false},
+];
+
+let activeGenre = 'all';
+
+/* ── TAB SWITCHING ── */
+function switchTab(tab) {
+  document.getElementById('panel-find').style.display = tab==='find'?'block':'none';
+  document.getElementById('panel-list').style.display = tab==='list'?'block':'none';
+  document.getElementById('tab-find').classList.toggle('active', tab==='find');
+  document.getElementById('tab-list').classList.toggle('active', tab==='list');
+}
+
+/* ── POPULATE STATE DROPDOWN ── */
+function populateStates() {
+  const states = Object.keys(INDIAN_LOCATIONS).sort();
+  const sf = document.getElementById('state-filter');
+  const ls = document.getElementById('ls-state');
+  states.forEach(s => {
+    sf.innerHTML += `<option value="${s}">${s}</option>`;
+    ls.innerHTML += `<option value="${s}">${s}</option>`;
+  });
+}
+
+/* ── GENRE FILTER ── */
+function setGenre(g, btn) {
+  activeGenre = g;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+/* ── PRICE SLIDER ── */
+function updatePriceLabel() {
+  const v = document.getElementById('price-slider').value;
+  document.getElementById('price-label').textContent = '₹' + parseInt(v).toLocaleString();
+  applyFilters();
+}
+
+/* ── APPLY FILTERS & RENDER ── */
+function applyFilters() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const state = document.getElementById('state-filter').value;
+  const maxPrice = parseInt(document.getElementById('price-slider').value);
+  const sortBy = document.getElementById('sort-select').value;
+
+  let filtered = EVENTS.filter(e => {
+    if (activeGenre !== 'all' && e.genre !== activeGenre) return false;
+    if (state && e.state !== state) return false;
+    if (e.price > maxPrice) return false;
+    if (q && ![e.title, e.city, e.venue, e.genre].some(f => f.toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  // Sort
+  if (sortBy === 'price-low') filtered.sort((a,b) => a.price - b.price);
+  else if (sortBy === 'price-high') filtered.sort((a,b) => b.price - a.price);
+  else if (sortBy === 'trending') filtered.sort((a,b) => (b.trending?1:0) - (a.trending?1:0));
+  else filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  document.getElementById('results-count').textContent = `Showing ${filtered.length} event${filtered.length!==1?'s':''}`;
+
+  const grid = document.getElementById('events-grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎵</div><div class="empty-state-text">No events found. Try adjusting your filters!</div></div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(e => {
+    const d = new Date(e.date);
+    const ds = d.toLocaleDateString('en-IN',{weekday:'short',month:'short',day:'numeric'});
+    const ts = d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    const bg = GENRE_COLORS[e.genre] || GENRE_COLORS.Pop;
+    return `<div class="event-card" onclick="goToEvent(${e.id})">
+      <div class="event-card-banner">
+        <div class="genre-banner" style="position:absolute;inset:0;background:${bg};"></div>
+        <div style="position:relative;z-index:1;">
+          ${e.trending ? '<span style="background:rgba(255,255,255,0.2);backdrop-filter:blur(6px);padding:2px 8px;border-radius:50px;font-size:0.65rem;font-weight:700;color:white;">🔥 Trending</span>' : ''}
+        </div>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-title">${e.title}</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:2px;">${e.genre}</div>
+        <div class="event-card-meta">
+          <span class="event-card-meta-item">📅 ${ds}</span>
+          <span class="event-card-meta-item">🕐 ${ts}</span>
+          <span class="event-card-meta-item">📍 ${e.venue}</span>
+        </div>
+      </div>
+      <div class="event-card-footer">
+        <div class="event-card-price">₹${e.price.toLocaleString()}</div>
+        <button class="btn btn-primary" style="font-size:0.75rem;padding:6px 16px;" onclick="event.stopPropagation();goToEvent(${e.id})">View & Book →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function goToEvent(id) {
+  window.location.href = `event-details.html?id=${id}`;
+}
+
+/* ── LIST YOUR SHOW — Multi-step ── */
+let lsAmPm = 'PM';
+function lsAMPM(v) {
+  lsAmPm = v;
+  document.getElementById('ls-pm').style.background = v==='PM'?'var(--accent)':'var(--bg3)';
+  document.getElementById('ls-pm').style.color = v==='PM'?'#fff':'var(--text2)';
+  document.getElementById('ls-am').style.background = v==='AM'?'var(--accent)':'var(--bg3)';
+  document.getElementById('ls-am').style.color = v==='AM'?'#fff':'var(--text2)';
+}
+function lsUpdateCities() {
+  const st = document.getElementById('ls-state').value;
+  const c = document.getElementById('ls-city');
+  c.innerHTML = '';
+  if (!st) { c.disabled = true; c.innerHTML = '<option value="">-- State first --</option>'; return; }
+  c.disabled = false;
+  c.innerHTML = '<option value="">-- Select City --</option>';
+  (INDIAN_LOCATIONS[st]||[]).forEach(ci => { c.innerHTML += `<option value="${ci}">${ci}</option>`; });
+}
+
+function lsNext(step) {
+  // Validate step 1
+  if (step === 2) {
+    const ti = document.getElementById('ls-title').value.trim();
+    const st = document.getElementById('ls-state').value;
+    const ci = document.getElementById('ls-city').value;
+    const ve = document.getElementById('ls-venue').value.trim();
+    const dt = document.getElementById('ls-date').value;
+    if (!ti) { showToast('⚠️ Enter an event title'); return; }
+    if (!st) { showToast('⚠️ Select a state'); return; }
+    if (!ci) { showToast('⚠️ Select a city'); return; }
+    if (!ve) { showToast('⚠️ Enter a venue'); return; }
+    if (!dt) { showToast('⚠️ Select a date'); return; }
+  }
+  // Build preview on step 3
+  if (step === 3) buildPreview();
+
+  // Show step
+  [1,2,3].forEach(s => {
+    document.getElementById('step-'+s).classList.toggle('active', s===step);
+    const ind = document.getElementById('step-ind-'+s);
+    ind.classList.remove('active','done');
+    if (s < step) ind.classList.add('done');
+    if (s === step) ind.classList.add('active');
+  });
+}
+
+function buildPreview() {
+  const title = document.getElementById('ls-title').value.trim();
+  const city = document.getElementById('ls-city').value;
+  const state = document.getElementById('ls-state').value;
+  const venue = document.getElementById('ls-venue').value.trim();
+  const date = document.getElementById('ls-date').value;
+  const genre = document.getElementById('ls-genre').value;
+  const vipP = document.getElementById('ls-vip-price').value;
+  const premP = document.getElementById('ls-prem-price').value;
+  const regP = document.getElementById('ls-reg-price').value;
+  const bg = GENRE_COLORS[genre] || GENRE_COLORS.Pop;
+  const d = date ? new Date(date+'T18:00') : new Date();
+  const ds = d.toLocaleDateString('en-IN',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+
+  let priceText = '';
+  const prices = [regP, premP, vipP].filter(Boolean).map(Number);
+  if (prices.length) priceText = `₹${Math.min(...prices).toLocaleString()}+`;
+  else priceText = 'Free';
+
+  document.getElementById('preview-card').innerHTML = `
+    <div class="event-card-banner"><div style="position:absolute;inset:0;background:${bg};"></div></div>
+    <div class="event-card-body">
+      <div class="event-card-title">${title}</div>
+      <div style="font-size:0.72rem;color:var(--text3);">${genre}</div>
+      <div class="event-card-meta">
+        <span class="event-card-meta-item">📅 ${ds}</span>
+        <span class="event-card-meta-item">📍 ${venue}, ${city}</span>
+      </div>
+    </div>
+    <div class="event-card-footer">
+      <div class="event-card-price">${priceText}</div>
+      <span class="badge badge-amber">Preview</span>
+    </div>`;
+}
+
+function publishShow() {
+  const title = document.getElementById('ls-title').value.trim();
+  const state = document.getElementById('ls-state').value;
+  const city = document.getElementById('ls-city').value;
+  const venue = document.getElementById('ls-venue').value.trim();
+  const date = document.getElementById('ls-date').value;
+  const genre = document.getElementById('ls-genre').value;
+  const regP = document.getElementById('ls-reg-price').value;
+  const premP = document.getElementById('ls-prem-price').value;
+
+  const price = parseFloat(regP) || parseFloat(premP) || 0;
+  EVENTS.push({id:EVENTS.length+1, state, city, title, date:date+'T18:00', venue, price, genre, trending:false});
+
+  showToast(`🌟 "${title}" is now listed!`);
+  switchTab('find');
+  applyFilters();
+  // Reset form
+  ['ls-title','ls-venue','ls-date','ls-desc','ls-vip-price','ls-vip-qty','ls-prem-price','ls-prem-qty','ls-reg-price','ls-reg-qty'].forEach(id => { const e = document.getElementById(id); if(e) e.value=''; });
+  document.getElementById('ls-state').value = '';
+  lsUpdateCities();
+  lsNext(1);
+}
+
+/* ── INIT ── */
+populateStates();
+(function(){const d=document.getElementById('ls-date');if(d)d.min=new Date().toISOString().split('T')[0];})();
+applyFilters();
+</script>
+</body>
+</html>

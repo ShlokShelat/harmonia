@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia Showcase — AI Music Generator</title>
+  <meta name="description" content="Describe your musical vision and AI composes a unique track.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html" class="active">AI Generator</a><a href="dashboard.html">Dashboard</a><a href="concerts.html">Concerts</a><a href="history.html">History</a><a href="anatomy.html">3D Anatomy</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content">
+  <div class="chip">✨ AI Music Generator</div>
+  <h1 class="section-title"><span class="gradient-text">Compose with AI</span></h1>
+  <p class="section-sub">Describe your vision — AI composes your unique track.</p>
+
+  <div class="gen-layout">
+    <!-- LEFT -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card hci-annotated">
+        <h3 style="font-weight:700;margin-bottom:10px;">🎭 Describe Your Music</h3>
+        <textarea id="music-prompt" rows="3" style="resize:none;" placeholder="e.g. A calm lo-fi piano track for late-night studying..."></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+          <span style="font-size:0.72rem;color:var(--text2);">Quick prompts:</span>
+          <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.68rem;" onclick="document.getElementById('music-prompt').value=''">✕ Clear</button>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;">
+          <span class="tag" onclick="setPrompt(this)" data-prompt="Upbeat jazz with trumpet and piano, happy mood">🎺 Jazz</span>
+          <span class="tag" onclick="setPrompt(this)" data-prompt="Calm lo-fi beats for studying, soft piano">📚 Lo-fi</span>
+          <span class="tag" onclick="setPrompt(this)" data-prompt="Epic cinematic orchestral adventure music">🎬 Cinematic</span>
+          <span class="tag" onclick="setPrompt(this)" data-prompt="Energetic electronic dance music with synth bass">⚡ EDM</span>
+          <span class="tag" onclick="setPrompt(this)" data-prompt="Peaceful acoustic guitar folk song">🌿 Folk</span>
+        </div>
+        <div class="hci-badge design-principle">
+          <div class="hci-badge-category">Design Principle</div>
+          <div class="hci-badge-title">🌍 Match Between System & Real World</div>
+          <div class="hci-badge-desc">Users describe music in natural language using familiar terms — no technical jargon required.</div>
+        </div>
+      </div>
+
+      <div class="card hci-annotated">
+        <h3 style="font-weight:700;margin-bottom:10px;">⚙️ Parameters</h3>
+        <div class="param-grid">
+          <div class="param-item"><label>Mood</label><select id="p-mood"><option>Calm</option><option>Energetic</option><option>Melancholic</option><option>Happy</option><option>Mysterious</option><option>Romantic</option></select></div>
+          <div class="param-item"><label>Genre</label><select id="p-genre"><option>Lo-fi</option><option>Jazz</option><option>Classical</option><option>Electronic</option><option>Folk</option><option>Pop</option><option>Rock</option></select></div>
+          <div class="param-item"><label>Tempo: <span id="tempo-val" style="color:var(--accent);">90 BPM</span></label><input type="range" id="p-tempo" min="60" max="180" value="90" oninput="document.getElementById('tempo-val').textContent=this.value+' BPM'" style="padding:0;border:none;background:transparent;"></div>
+          <div class="param-item"><label>Key</label><select id="p-key"><option>C Major</option><option>G Major</option><option>D Minor</option><option>A Minor</option><option>F Major</option><option>E Minor</option></select></div>
+        </div>
+        <div class="hci-badge usability-principle">
+          <div class="hci-badge-category">Universal Usability</div>
+          <div class="hci-badge-title">🎯 Constraint-Based Design</div>
+          <div class="hci-badge-desc">Dropdowns restrict choices to valid values (moods, genres, keys) — preventing errors and reducing decision fatigue.</div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px;background:var(--bg3);border-radius:8px;">
+          <input type="checkbox" id="p-lyrics" style="width:16px;height:16px;accent-color:var(--accent);" onchange="toggleVocalistOptions()">
+          <label for="p-lyrics" style="font-size:0.82rem;cursor:pointer;">🎤 Generate with Vocals</label>
+        </div>
+        <div id="vocalist-options" style="display:none;margin-top:8px;padding:12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+          <div style="font-weight:700;font-size:0.78rem;margin-bottom:8px;color:var(--accent);">🎙️ Vocalist</div>
+          <div style="display:flex;gap:10px;margin-bottom:8px;">
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:7px 14px;background:var(--bg2);border:2px solid var(--accent);border-radius:8px;font-size:0.8rem;font-weight:600;" id="female-voice-label"><input type="radio" name="vocalist" value="female" checked style="accent-color:var(--accent);" onchange="updateVoiceLabels()"> 👩 Female</label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:7px 14px;background:var(--bg2);border:2px solid var(--border);border-radius:8px;font-size:0.8rem;font-weight:600;" id="male-voice-label"><input type="radio" name="vocalist" value="male" style="accent-color:var(--accent);" onchange="updateVoiceLabels()"> 👨 Male</label>
+          </div>
+          <select id="p-vocal-style"><option>Smooth & Soulful</option><option>Powerful & Dynamic</option><option>Soft & Breathy</option><option>Rich Vibrato</option></select>
+        </div>
+        <div class="hci-badge design-principle">
+          <div class="hci-badge-category">Design Principle</div>
+          <div class="hci-badge-title">📦 Progressive Disclosure</div>
+          <div class="hci-badge-desc">Vocalist settings hidden until "Vocals" is checked — reduces complexity for users who don't need it.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="form-label">🏷️ Song Name <span style="color:var(--text3);font-weight:400;">(optional)</span></label>
+        <input type="text" id="song-name" placeholder="e.g. Midnight Dreams">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:0.95rem;" onclick="generateMusic()" id="gen-btn">✨ Generate Music</button>
+      <div class="hci-badge design-principle">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">🔔 Feedback & Affordance</div>
+        <div class="hci-badge-desc">Loading spinner + status text during generation reassures the user. Gradient button signals the primary action.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="output-area" id="output-area">
+        <div style="text-align:center;padding:30px;" id="output-placeholder">
+          <div style="font-size:2.5rem;margin-bottom:8px;">🎵</div>
+          <h3 style="margin-bottom:4px;">Your music will appear here</h3>
+          <p style="color:var(--text2);font-size:0.84rem;">Fill in your prompt and hit Generate!</p>
+        </div>
+        <div id="output-content" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--coral));display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🎵</div>
+            <div><div style="font-weight:700;font-size:1rem;" id="out-name">—</div><div style="color:var(--text2);font-size:0.72rem;" id="out-meta">—</div></div>
+          </div>
+          <div class="waveform-display"><div class="waveform-bars" id="waveform-bars"></div></div>
+          <div class="player-controls">
+            <button class="play-btn" id="play-btn" onclick="togglePlayback()">▶</button>
+            <span class="time-display" id="time-display">0:00 / 0:32</span>
+            <input type="range" class="seek-bar" id="seek-bar" min="0" max="100" value="0" style="padding:0;border:none;background:var(--border);">
+          </div>
+          <div id="lyrics-area" style="display:none;background:var(--bg3);border-radius:8px;padding:14px;max-height:180px;overflow-y:auto;">
+            <div style="font-weight:700;margin-bottom:6px;font-size:0.82rem;">📝 Lyrics</div>
+            <pre style="font-size:0.78rem;color:var(--text2);white-space:pre-wrap;line-height:1.5;" id="lyrics-text"></pre>
+          </div>
+        </div>
+      </div>
+      <div class="hci-badge design-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">🎨 Aesthetic & Minimalist Design</div>
+        <div class="hci-badge-desc">Clean two-column layout with generous whitespace. Waveform visualization adds delight without clutter.</div>
+      </div>
+
+      <div style="margin-top:18px;">
+        <h3 style="font-weight:700;margin-bottom:10px;">🕐 Generated Tracks</h3>
+        <div id="song-history"></div>
+        <div class="hci-badge usability-principle" style="margin-top:8px;">
+          <div class="hci-badge-category">Universal Usability</div>
+          <div class="hci-badge-title">🔙 User Control & Freedom</div>
+          <div class="hci-badge-desc">Song history persists. Clear button on prompt provides undo. Users can go back to any previous track.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning platform.</p></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Pages</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="training.html" style="color:var(--text2);font-size:0.82rem;">Training</a><a href="ai-generator.html" style="color:var(--text2);font-size:0.82rem;">AI Generator</a><a href="dashboard.html" style="color:var(--text2);font-size:0.82rem;">Dashboard</a><a href="concerts.html" style="color:var(--text2);font-size:0.82rem;">Concerts</a><a href="history.html" style="color:var(--text2);font-size:0.82rem;">History</a><a href="anatomy.html" style="color:var(--text2);font-size:0.82rem;">3D Anatomy</a></div></div></div><div class="footer-bottom"><span>© 2025 Harmonia Showcase</span><span>HCI — Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+function setPrompt(el) { document.getElementById('music-prompt').value = el.dataset.prompt; document.querySelectorAll('.tag').forEach(t=>t.classList.remove('active')); el.classList.add('active'); showToast('📝 Prompt set!'); }
+function toggleVocalistOptions() { document.getElementById('vocalist-options').style.display = document.getElementById('p-lyrics').checked ? 'block' : 'none'; }
+function updateVoiceLabels() { const f = document.querySelector('input[name="vocalist"][value="female"]').checked; document.getElementById('female-voice-label').style.borderColor = f?'var(--accent)':'var(--border)'; document.getElementById('male-voice-label').style.borderColor = !f?'var(--accent)':'var(--border)'; }
+
+let generatedTracks = [], isPlaying = false, playbackInterval = null;
+function generateMusic() {
+  const prompt = document.getElementById('music-prompt').value.trim();
+  if (!prompt) { showToast('Please enter a prompt!'); return; }
+  const btn = document.getElementById('gen-btn');
+  btn.innerHTML = '<div class="gen-spinner"></div> Generating...'; btn.disabled = true;
+  setTimeout(() => {
+    const mood=document.getElementById('p-mood').value, genre=document.getElementById('p-genre').value, tempo=document.getElementById('p-tempo').value, key=document.getElementById('p-key').value;
+    const sfx=['Dreams','Waves','Nights','Echoes','Journey','Drift','Horizon','Aurora'];
+    const customName = document.getElementById('song-name').value.trim();
+    const name = customName || prompt.split(' ').filter(w=>w.length>3)[0]?.replace(/[^a-zA-Z]/g,'')||'Audio';
+    const fullName = customName || (name.charAt(0).toUpperCase()+name.slice(1))+' '+sfx[Math.floor(Math.random()*sfx.length)];
+    document.getElementById('output-placeholder').style.display='none';
+    document.getElementById('output-content').style.display='block';
+    document.getElementById('out-name').textContent = fullName;
+    document.getElementById('out-meta').textContent = `${genre} • ${mood} • ${tempo} BPM • ${key}`;
+    const bars = document.getElementById('waveform-bars'); bars.innerHTML = '';
+    for (let i=0;i<64;i++){ const b=document.createElement('div'); b.className='wbar'; b.style.height=(15+Math.random()*70)+'%'; bars.appendChild(b); }
+    if (document.getElementById('p-lyrics').checked) {
+      document.getElementById('lyrics-area').style.display='block';
+      const lines = {Calm:['Peaceful moments drift on by','Quiet whispers soft and low'],Energetic:['We own the night, the stage','Breaking free from every cage'],Melancholic:['Shadows fall on empty streets','Memories play on repeat'],Happy:['Sunshine breaking through the grey','Joy in every sight and sound'],Mysterious:['Secrets hidden in the dark','The unknown is calling me'],Romantic:['Your smile lights up my world','Love is written in the stars']};
+      const l = lines[mood]||lines.Calm;
+      document.getElementById('lyrics-text').textContent = `[Verse 1]\n${l[0]}\n${l[1]}\n\n[Chorus]\nEvery note tells a story\nMusic is our territory\n\n[Outro]\n${l[0]}... (fade out)`;
+    } else { document.getElementById('lyrics-area').style.display='none'; }
+    generatedTracks.unshift({name:fullName,genre,mood,tempo,key,date:new Date().toLocaleDateString()});
+    buildSongHistory(); btn.innerHTML='✨ Generate Music'; btn.disabled=false;
+    showToast(`🎵 "${fullName}" generated!`);
+    playGeneratedMelody(genre,key,parseInt(tempo));
+  }, 2000);
+}
+function playGeneratedMelody(genre,key,bpm) {
+  const SCALES={'C Major':[261.63,293.66,329.63,349.23,392,440,493.88,523.25],'G Major':[392,440,493.88,523.25,587.33,659.25,739.99,783.99],'D Minor':[293.66,329.63,349.23,392,440,466.16,523.25,587.33],'A Minor':[220,246.94,261.63,293.66,329.63,349.23,392,440],'F Major':[349.23,392,440,466.16,523.25,587.33,659.25,698.46],'E Minor':[329.63,369.99,392,440,493.88,523.25,587.33,659.25]};
+  const scale=SCALES[key]||SCALES['C Major']; const wt={Lofi:'sine',Jazz:'triangle',Classical:'sine',Electronic:'square',Folk:'triangle',Pop:'sine',Rock:'sawtooth'}[genre]||'sine';
+  let t=0; for(let i=0;i<8;i++){const f=scale[i%scale.length]; setTimeout(()=>playTone(f,wt,60/bpm*.8,.2),t*1000); t+=60/bpm*.5;}
+}
+function togglePlayback() {
+  isPlaying=!isPlaying; document.getElementById('play-btn').textContent=isPlaying?'⏸':'▶';
+  if(isPlaying){let p=parseInt(document.getElementById('seek-bar').value)||0;
+    playbackInterval=setInterval(()=>{p=Math.min(100,p+1);document.getElementById('seek-bar').value=p;
+      const s=Math.floor(p*32/100); document.getElementById('time-display').textContent=`${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')} / 0:32`;
+      document.querySelectorAll('.wbar').forEach(b=>b.style.height=(15+Math.random()*70)+'%');
+      if(p>=100){clearInterval(playbackInterval);isPlaying=false;document.getElementById('play-btn').textContent='▶';}},320);
+  } else clearInterval(playbackInterval);
+}
+function buildSongHistory() {
+  const c=document.getElementById('song-history'); if(!c) return;
+  if(!generatedTracks.length){c.innerHTML='<div class="feedback-box" style="text-align:center;">No tracks yet 🎵</div>';return;}
+  c.innerHTML=generatedTracks.map(t=>`<div class="song-item" style="margin-bottom:6px;"><div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--coral));display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;">🎵</div><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.name}</div><div style="color:var(--text2);font-size:0.68rem;">${t.genre} • ${t.mood}</div></div><span style="color:var(--text3);font-size:0.68rem;font-family:var(--font-mono);">${t.date}</span></div>`).join('');
+}
+buildSongHistory();
+</script>
+</body>
+</html>

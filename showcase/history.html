@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia Showcase — Music History</title>
+  <meta name="description" content="Journey through 2000 years of music history, from ancient traditions to modern genres.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .era-filter { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px; }
+    .era-btn { background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 14px;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all .2s; }
+    .era-btn:hover,.era-btn.active { border-color:var(--accent);color:var(--accent);background:rgba(249,115,22,0.06); }
+    .theory-card { background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:all .25s; }
+    .theory-card:hover { border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--glow); }
+    .theory-card-title { font-weight:700;font-size:0.92rem;margin-bottom:6px; }
+    .theory-card-desc { color:var(--text2);font-size:0.78rem;line-height:1.5; }
+    .audio-sample { display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:8px 12px;margin-top:8px;cursor:pointer;transition:all .15s; }
+    .audio-sample:hover { border-color:var(--accent); }
+    .audio-play-btn { width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:white;font-size:0.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .quiz-option { background:var(--card);border:2px solid var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all .15s;text-align:left;width:100%; }
+    .quiz-option:hover { border-color:var(--accent);color:var(--accent); }
+    .quiz-option.correct { border-color:var(--emerald);background:rgba(16,185,129,0.08);color:var(--emerald); }
+    .quiz-option.wrong { border-color:var(--coral);background:rgba(244,63,94,0.08);color:var(--coral); }
+  </style>
+</head>
+<body>
+<nav role="navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links"><a href="training.html">Training</a><a href="ai-generator.html">AI Generator</a><a href="dashboard.html">Dashboard</a><a href="concerts.html">Concerts</a><a href="history.html" class="active">History</a><a href="anatomy.html">3D Anatomy</a><a href="my-bookings.html">My Bookings</a><a href="profile.html">Profile</a></div>
+  <div class="nav-actions"><button class="theme-btn" id="btn-theme" onclick="toggleTheme()">🌙</button></div>
+</nav>
+
+<div class="container page-content">
+  <div class="chip">📜 Music History</div>
+  <h1 class="section-title"><span class="gradient-text">Journey Through Music</span></h1>
+  <p class="section-sub">From ancient chants to modern genres — explore 2000+ years of musical evolution.</p>
+
+  <!-- ERA FILTER -->
+  <div class="era-filter" id="era-filter">
+    <button class="era-btn active" onclick="filterEra('all',this)">🌐 All Eras</button>
+    <button class="era-btn" onclick="filterEra('ancient',this)">🏛️ Ancient</button>
+    <button class="era-btn" onclick="filterEra('medieval',this)">⚔️ Medieval</button>
+    <button class="era-btn" onclick="filterEra('baroque',this)">🎻 Baroque</button>
+    <button class="era-btn" onclick="filterEra('classical',this)">🎼 Classical</button>
+    <button class="era-btn" onclick="filterEra('romantic',this)">🌹 Romantic</button>
+    <button class="era-btn" onclick="filterEra('modern',this)">⚡ Modern</button>
+  </div>
+  <div class="hci-badge usability-principle">
+    <div class="hci-badge-category">Universal Usability</div>
+    <div class="hci-badge-title">🔍 Flexibility & Efficiency</div>
+    <div class="hci-badge-desc">Era filter buttons let users quickly jump to their period of interest instead of scrolling the entire timeline.</div>
+  </div>
+
+  <div class="grid-2" style="gap:30px;align-items:start;margin-top:20px;">
+    <!-- LEFT: Timeline -->
+    <div>
+      <h3 style="font-weight:700;margin-bottom:16px;">📜 Historical Timeline</h3>
+      <div class="timeline" id="timeline"></div>
+      <div class="hci-badge design-principle">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">📊 Temporal Navigation</div>
+        <div class="hci-badge-desc">Vertical timeline with color-coded dots creates a clear chronological narrative — users see the flow of musical evolution at a glance.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Theory + Quiz -->
+    <div>
+      <h3 style="font-weight:700;margin-bottom:16px;">📖 Music Theory Concepts</h3>
+      <div class="grid-2" style="gap:10px;margin-bottom:20px;" id="theory-cards"></div>
+      <div class="hci-badge design-principle">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">🧩 Chunking (Information Architecture)</div>
+        <div class="hci-badge-desc">Theory concepts are organized into digestible cards — breaking complex music theory into scannable chunks.</div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <h3 style="font-weight:700;margin-bottom:14px;">🎯 Quick Quiz</h3>
+      <div class="card" id="quiz-container"></div>
+      <div class="hci-badge usability-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">🎮 Active Learning & Feedback</div>
+        <div class="hci-badge-desc">Immediate color-coded feedback (green=correct, red=wrong) on quiz answers supports learning for users of all levels.</div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <h3 style="font-weight:700;margin-bottom:14px;">🎧 Listen & Learn</h3>
+      <div id="audio-samples"></div>
+      <div class="hci-badge design-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Design Principle</div>
+        <div class="hci-badge-title">🔊 Multimodal Interaction</div>
+        <div class="hci-badge-desc">Audio samples complement visual text — engaging both auditory and visual learning channels for better retention.</div>
+      </div>
+
+      <div class="hci-badge usability-principle" style="margin-top:10px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">📱 Responsive Content</div>
+        <div class="hci-badge-desc">Two-column layout collapses to single column on mobile — ensuring readability on all devices and screen sizes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<footer><div class="container"><div class="footer-content"><div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">Interactive music learning & live events platform.</p></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Explore</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="training.html" style="color:var(--text2);font-size:0.82rem;">Training</a><a href="concerts.html" style="color:var(--text2);font-size:0.82rem;">Concerts</a><a href="history.html" style="color:var(--text2);font-size:0.82rem;">History</a></div></div><div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Account</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="my-bookings.html" style="color:var(--text2);font-size:0.82rem;">My Bookings</a><a href="profile.html" style="color:var(--text2);font-size:0.82rem;">Profile</a><a href="about.html" style="color:var(--text2);font-size:0.82rem;">About</a></div></div></div><div class="footer-bottom"><span>© 2026 Harmonia</span><span>HCI — Design Principles & Universal Usability</span></div></div></footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+
+const TIMELINE_DATA = [
+  {era:'ancient',year:'500 BC',title:'Ancient Greek Music',desc:'Pythagoras discovers mathematical ratios in musical intervals. Greek modes form the basis of Western music theory.',color:'var(--sky)'},
+  {era:'ancient',year:'300 BC',title:'Indian Raga System',desc:'Ancient Indian texts codify the Raga system — melodic frameworks that influence mood and time of day.',color:'var(--sky)'},
+  {era:'medieval',year:'800 AD',title:'Gregorian Chant',desc:'Monophonic sacred music dominates Europe. Pope Gregory I standardizes liturgical chants.',color:'var(--emerald)'},
+  {era:'medieval',year:'1100',title:'Troubadour Songs',desc:'Secular music flourishes in France. Troubadours compose and perform songs of courtly love.',color:'var(--emerald)'},
+  {era:'baroque',year:'1600',title:'Birth of Opera',desc:'Jacopo Peri writes "Dafne" — the first opera. Music becomes dramatic and ornate.',color:'var(--amber)'},
+  {era:'baroque',year:'1685',title:'Bach & Handel',desc:'Johann Sebastian Bach and George Frideric Handel define the Baroque era with complex compositions.',color:'var(--amber)'},
+  {era:'classical',year:'1756',title:'Mozart Era',desc:'Wolfgang Amadeus Mozart composes over 600 works, perfecting the Classical form and symphony.',color:'var(--accent)'},
+  {era:'classical',year:'1770',title:'Beethoven',desc:'Ludwig van Beethoven bridges Classical and Romantic periods. His 9th Symphony is a landmark.',color:'var(--accent)'},
+  {era:'romantic',year:'1830',title:'Romantic Period',desc:'Music becomes deeply emotional. Chopin, Liszt, and Brahms push piano music to new heights.',color:'var(--coral)'},
+  {era:'romantic',year:'1880',title:'Impressionism',desc:'Debussy and Ravel create atmospheric, colorful music that mirrors Impressionist painting.',color:'var(--coral)'},
+  {era:'modern',year:'1950',title:'Rock & Roll',desc:'Chuck Berry, Elvis Presley launch rock and roll. Electric guitar changes music forever.',color:'var(--violet)'},
+  {era:'modern',year:'1980',title:'Electronic Music',desc:'Synthesizers, drum machines, and digital recording transform popular music production.',color:'var(--violet)'},
+  {era:'modern',year:'2020',title:'AI-Generated Music',desc:'Machine learning models compose original music. AI becomes a creative collaborator.',color:'var(--violet)'},
+];
+
+const THEORY_DATA = [
+  {icon:'🎵',title:'Notes & Scales',desc:'The 12 notes of Western music and how they combine into major and minor scales.'},
+  {icon:'🎼',title:'Time Signatures',desc:'How beats are grouped — 4/4 (common), 3/4 (waltz), 6/8 (compound) and more.'},
+  {icon:'🎹',title:'Chords & Harmony',desc:'Triads, seventh chords, progressions — the vertical building blocks of music.'},
+  {icon:'🎻',title:'Melody & Counterpoint',desc:'How single lines weave together — from Bach fugues to modern pop hooks.'},
+  {icon:'📏',title:'Intervals',desc:'The distance between two notes — minor 2nds to perfect octaves.'},
+  {icon:'🔑',title:'Key Signatures',desc:'Sharps and flats that define the tonal center of a piece.'},
+];
+
+const QUIZ_DATA = [
+  {q:'How many notes are in a chromatic scale?',options:['7','10','12','15'],answer:2},
+  {q:'Who composed the "Moonlight Sonata"?',options:['Mozart','Bach','Beethoven','Chopin'],answer:2},
+  {q:'What time signature is a waltz?',options:['4/4','3/4','6/8','2/4'],answer:1},
+  {q:'Which instrument family does a trumpet belong to?',options:['Woodwind','String','Brass','Percussion'],answer:2},
+  {q:'What is the distance between C and G called?',options:['Third','Fourth','Fifth','Sixth'],answer:2},
+];
+
+const AUDIO_SAMPLES_DATA = [
+  {name:'Gregorian Chant',era:'Medieval',desc:'Monophonic sacred music — pure vocal melody.',freq:293.66,waveType:'sine',duration:2},
+  {name:'Baroque Harpsichord',era:'Baroque',desc:'Ornate keyboard arpeggio in D major.',freq:293.66,waveType:'triangle',duration:1.5},
+  {name:'Classical Piano',era:'Classical',desc:'Elegant Mozart-style melody.',freq:523.25,waveType:'sine',duration:1.2},
+  {name:'Rock Guitar Riff',era:'Modern',desc:'Distorted power chord progression.',freq:146.83,waveType:'sawtooth',duration:1},
+  {name:'Electronic Synth',era:'Modern',desc:'Pulsing synthesizer bass line.',freq:110,waveType:'square',duration:0.8},
+];
+
+let currentQuiz = 0, quizAnswered = false;
+
+function buildTimeline() {
+  const c = document.getElementById('timeline'); c.innerHTML = '';
+  TIMELINE_DATA.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'timeline-item fade-in'; el.dataset.era = item.era;
+    el.innerHTML = `<div class="timeline-dot" style="background:${item.color};"></div>
+      <div class="timeline-era" style="color:${item.color};">${item.year}</div>
+      <div class="timeline-title">${item.title}</div>
+      <div class="timeline-desc">${item.desc}</div>`;
+    c.appendChild(el);
+  });
+}
+
+function filterEra(era, btn) {
+  document.querySelectorAll('.era-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.timeline-item').forEach(el => {
+    el.style.display = (era === 'all' || el.dataset.era === era) ? 'block' : 'none';
+  });
+}
+
+function buildTheoryCards() {
+  const c = document.getElementById('theory-cards');
+  c.innerHTML = THEORY_DATA.map(t => `<div class="theory-card">
+    <div style="font-size:1.4rem;margin-bottom:6px;">${t.icon}</div>
+    <div class="theory-card-title">${t.title}</div>
+    <div class="theory-card-desc">${t.desc}</div>
+  </div>`).join('');
+}
+
+function buildQuiz() {
+  const c = document.getElementById('quiz-container');
+  const q = QUIZ_DATA[currentQuiz];
+  quizAnswered = false;
+  c.innerHTML = `<div style="margin-bottom:8px;font-size:0.72rem;color:var(--text2);">Question ${currentQuiz+1} of ${QUIZ_DATA.length}</div>
+    <div style="font-weight:700;font-size:1rem;margin-bottom:14px;">${q.q}</div>
+    <div style="display:flex;flex-direction:column;gap:8px;" id="quiz-options"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:14px;">
+      <button class="btn btn-secondary" style="font-size:0.78rem;padding:6px 14px;" onclick="prevQuiz()" ${currentQuiz===0?'disabled style="opacity:0.4;font-size:0.78rem;padding:6px 14px;"':''}>← Prev</button>
+      <button class="btn btn-primary" style="font-size:0.78rem;padding:6px 14px;" onclick="nextQuiz()">Next →</button>
+    </div>`;
+  const opts = document.getElementById('quiz-options');
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option'; btn.textContent = opt;
+    btn.addEventListener('click', () => answerQuiz(i, q.answer));
+    opts.appendChild(btn);
+  });
+}
+
+function answerQuiz(selected, correct) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach((o, i) => {
+    if (i === correct) o.classList.add('correct');
+    else if (i === selected) o.classList.add('wrong');
+  });
+  if (selected === correct) showToast('✅ Correct!');
+  else showToast('❌ Not quite — see highlighted answer');
+}
+
+function nextQuiz() { currentQuiz = (currentQuiz + 1) % QUIZ_DATA.length; buildQuiz(); }
+function prevQuiz() { currentQuiz = (currentQuiz - 1 + QUIZ_DATA.length) % QUIZ_DATA.length; buildQuiz(); }
+
+function buildAudioSamples() {
+  const c = document.getElementById('audio-samples');
+  c.innerHTML = AUDIO_SAMPLES_DATA.map((s, i) => `<div class="audio-sample" onclick="playSample(${i})" style="margin-bottom:6px;">
+    <button class="audio-play-btn">▶</button>
+    <div style="flex:1;"><div style="font-weight:600;font-size:0.82rem;">${s.name}</div><div style="color:var(--text2);font-size:0.68rem;">${s.era} — ${s.desc}</div></div>
+  </div>`).join('');
+}
+
+function playSample(idx) {
+  const s = AUDIO_SAMPLES_DATA[idx];
+  playTone(s.freq, s.waveType, s.duration, 0.2);
+  showToast(`🎧 Playing: ${s.name}`);
+}
+
+buildTimeline(); buildTheoryCards(); buildQuiz(); buildAudioSamples();
+</script>
+</body>
+</html>

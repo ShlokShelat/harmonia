@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonia Showcase — Instrument Training</title>
+  <meta name="description" content="Learn piano, guitar, drums, violin and flute with real-time audio.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav role="navigation" aria-label="Main navigation">
+  <a class="nav-logo" href="index.html">🎵 Harmonia</a>
+  <div class="nav-links">
+    <a href="training.html" class="active">Training</a>
+    <a href="ai-generator.html">AI Generator</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="concerts.html">Concerts</a>
+    <a href="history.html">History</a>
+    <a href="anatomy.html">3D Anatomy</a>
+  </div>
+  <div class="nav-actions">
+    <button class="theme-btn" id="btn-theme" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="container page-content">
+  <div class="chip">🎸 Instrument Training</div>
+  <h1 class="section-title"><span class="gradient-text">Choose Your Instrument</span></h1>
+  <p class="section-sub">Click or press keys to play real notes — your ears learn as you play.</p>
+
+  <!-- Instrument Tabs -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;" role="tablist" id="instrument-tabs" class="hci-annotated">
+    <button class="instr-btn active" onclick="selectInstrument('piano')" id="ibtn-piano">🎹 Piano</button>
+    <button class="instr-btn" onclick="selectInstrument('guitar')" id="ibtn-guitar">🎸 Guitar</button>
+    <button class="instr-btn" onclick="selectInstrument('drums')" id="ibtn-drums">🥁 Drums</button>
+    <button class="instr-btn" onclick="selectInstrument('violin')" id="ibtn-violin">🎻 Violin</button>
+    <button class="instr-btn" onclick="selectInstrument('flute')" id="ibtn-flute">🪈 Flute</button>
+    <div class="hci-badge design-principle">
+      <div class="hci-badge-category">Design Principle</div>
+      <div class="hci-badge-title">🔄 Consistency & Standards</div>
+      <div class="hci-badge-desc">All instrument tabs use identical styling, placement, and interaction patterns — reducing cognitive load for users.</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="gap:24px;align-items:start;">
+    <!-- LEFT: Instruments -->
+    <div>
+      <!-- PIANO -->
+      <div id="instr-piano" class="hci-annotated">
+        <div class="piano-wrap">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <h3 style="font-weight:700;">🎹 Virtual Piano</h3>
+            <span style="color:var(--text2);font-size:0.75rem;">Keys: A S D F G H J K L ;</span>
+          </div>
+          <div class="piano" id="pianoKeys" role="group" aria-label="Piano keyboard"></div>
+          <div class="feedback-box" id="piano-feedback" aria-live="polite">Press any key or click the piano above 🎵</div>
+        </div>
+        <div class="hci-badge design-principle">
+          <div class="hci-badge-category">Design Principle</div>
+          <div class="hci-badge-title">👆 Direct Manipulation</div>
+          <div class="hci-badge-desc">Users interact directly with piano keys — clicking or pressing produces immediate auditory feedback, creating a natural input→output mapping.</div>
+        </div>
+
+        <!-- Scale Challenge -->
+        <div class="card" style="margin-top:14px;" class="hci-annotated-usability">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <h4 style="font-weight:700;">🎯 C Major Scale Challenge</h4>
+            <span class="badge badge-amber">+20 XP</span>
+          </div>
+          <p style="color:var(--text2);font-size:0.84rem;margin-bottom:10px;">Play in order: <strong style="color:var(--accent);">C → D → E → F → G → A → B → C</strong></p>
+          <div id="scale-progress" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
+          <div class="progress-bar-wrap"><div class="progress-bar" id="scale-bar" style="width:0%"></div></div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-primary" style="font-size:0.8rem;padding:8px 16px;" onclick="startScaleChallenge()">▶ Start</button>
+            <button class="btn btn-secondary" style="font-size:0.8rem;padding:8px 16px;" onclick="resetChallenge()">↺ Reset</button>
+          </div>
+          <div class="hci-badge usability-principle">
+            <div class="hci-badge-category">Universal Usability</div>
+            <div class="hci-badge-title">🛡️ Error Prevention & Guidance</div>
+            <div class="hci-badge-desc">Step-by-step visual progress dots guide users through the scale, preventing confusion about what note to play next.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GUITAR -->
+      <div id="instr-guitar" style="display:none;">
+        <div class="card" style="margin-bottom:14px;">
+          <h3 style="font-weight:700;margin-bottom:6px;">🎸 Virtual Guitar</h3>
+          <p style="color:var(--text2);font-size:0.8rem;margin-bottom:12px;">Click fret dots to hear each note</p>
+          <div class="guitar-fretboard"><div class="guitar-strings" id="guitarStrings"></div></div>
+          <div class="feedback-box" id="guitar-feedback" aria-live="polite">Click a fret to play 🎸</div>
+          <div class="hci-badge design-principle">
+            <div class="hci-badge-category">Design Principle</div>
+            <div class="hci-badge-title">🗺️ Spatial Mapping</div>
+            <div class="hci-badge-desc">Fretboard layout maps to real guitar string/fret positions — leveraging users' existing mental models of the instrument.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRUMS -->
+      <div id="instr-drums" style="display:none;">
+        <div class="card">
+          <h3 style="font-weight:700;margin-bottom:4px;">🥁 Drum Pads</h3>
+          <p style="color:var(--text2);font-size:0.8rem;margin-bottom:14px;">Click pads or press Q/W/E/R/A/S/D/F</p>
+          <div class="drum-pad-grid" id="drumPads"></div>
+          <div class="feedback-box" id="drum-feedback" aria-live="polite">Hit those pads! 🥁</div>
+          <div style="margin-top:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+              <span style="font-size:0.8rem;font-weight:600;">Session Score</span>
+              <span id="drum-score" style="font-family:var(--font-mono);color:var(--accent);">0 pts</span>
+            </div>
+            <div class="progress-bar-wrap"><div class="progress-bar" id="drum-bar" style="width:0%"></div></div>
+          </div>
+          <div class="hci-badge usability-principle">
+            <div class="hci-badge-category">Universal Usability</div>
+            <div class="hci-badge-title">⌨️ Flexibility & Efficiency</div>
+            <div class="hci-badge-desc">Dual input: click for beginners, keyboard shortcuts [Q/W/E/R/A/S/D/F] for power users — accommodating diverse skill levels.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIOLIN -->
+      <div id="instr-violin" style="display:none;">
+        <div class="card">
+          <h3 style="font-weight:700;margin-bottom:6px;">🎻 Violin Strings</h3>
+          <p style="color:var(--text2);font-size:0.8rem;margin-bottom:12px;">Click positions on each string to hear bowed tones</p>
+          <div id="violin-interface" style="background:var(--bg3);border-radius:10px;padding:18px;"></div>
+          <div class="feedback-box" id="violin-feedback" aria-live="polite">Touch a string position 🎻</div>
+        </div>
+      </div>
+
+      <!-- FLUTE -->
+      <div id="instr-flute" style="display:none;">
+        <div class="card">
+          <h3 style="font-weight:700;margin-bottom:6px;">🪈 Flute Keys</h3>
+          <p style="color:var(--text2);font-size:0.8rem;margin-bottom:12px;">Press finger holes to play notes</p>
+          <div id="flute-interface" style="background:var(--bg3);border-radius:10px;padding:18px;"></div>
+          <div class="feedback-box" id="flute-feedback" aria-live="polite">Press holes to play 🪈</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Progress + Lessons -->
+    <div>
+      <div class="card" style="margin-bottom:18px;" class="hci-annotated">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <h3 style="font-weight:700;">📈 Your Progress</h3>
+          <span class="badge badge-amber" id="level-badge">⭐ Level 3</span>
+        </div>
+        <div style="display:flex;gap:14px;margin-bottom:14px;">
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--accent);" id="xp-display">280</div>
+            <div style="color:var(--text2);font-size:0.72rem;">Total XP</div>
+          </div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--emerald);" id="streak-display">🔥 5</div>
+            <div style="color:var(--text2);font-size:0.72rem;">Day Streak</div>
+          </div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--amber);" id="acc-display">87%</div>
+            <div style="color:var(--text2);font-size:0.72rem;">Accuracy</div>
+          </div>
+        </div>
+        <div style="margin-bottom:5px;font-size:0.78rem;display:flex;justify-content:space-between;">
+          <span>Level 3 → Level 4</span><span style="color:var(--text2);">280/400 XP</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:70%"></div></div>
+        <div class="hci-badge design-principle">
+          <div class="hci-badge-category">Design Principle</div>
+          <div class="hci-badge-title">👁️ Visibility of System Status</div>
+          <div class="hci-badge-desc">XP, streak, accuracy, and level progress are always visible — users always know where they stand in their learning journey.</div>
+        </div>
+      </div>
+
+      <h3 style="font-weight:700;margin-bottom:10px;">📚 Piano Lessons</h3>
+      <div id="lessons-list" class="hci-annotated-usability"></div>
+      <div class="hci-badge usability-principle" style="margin-top:8px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">📋 Recognition over Recall</div>
+        <div class="hci-badge-desc">Green ✓ / orange current / grey locked icons let users recognize lesson status at a glance without memorizing what they've done.</div>
+      </div>
+
+      <div class="hci-badge usability-principle" style="margin-top:8px;">
+        <div class="hci-badge-category">Universal Usability</div>
+        <div class="hci-badge-title">♿ Accessibility (WCAG)</div>
+        <div class="hci-badge-desc">ARIA labels on all interactive elements, aria-live regions for screen-reader feedback, keyboard navigation, and high contrast colors.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HCI Toggle -->
+<button class="hci-toggle" onclick="toggleAnnotations()">📐 Show HCI Principles</button>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-content">
+      <div style="flex:2;"><div class="footer-logo">🎵 Harmonia</div><p class="footer-tagline">The world's most interactive music learning platform.</p></div>
+      <div><div style="font-weight:700;margin-bottom:10px;font-size:0.84rem;">Pages</div><div style="display:flex;flex-direction:column;gap:6px;"><a href="training.html" style="color:var(--text2);font-size:0.82rem;">Training</a><a href="ai-generator.html" style="color:var(--text2);font-size:0.82rem;">AI Generator</a><a href="dashboard.html" style="color:var(--text2);font-size:0.82rem;">Dashboard</a><a href="concerts.html" style="color:var(--text2);font-size:0.82rem;">Concerts</a><a href="history.html" style="color:var(--text2);font-size:0.82rem;">History</a><a href="anatomy.html" style="color:var(--text2);font-size:0.82rem;">3D Anatomy</a></div></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 Harmonia Showcase</span><span>HCI Showcase — Design Principles & Universal Usability</span></div>
+  </div>
+</footer>
+
+<script src="shared.js"></script>
+<script>
+'use strict';
+let currentInstrument = 'piano';
+function selectInstrument(id) {
+  currentInstrument = id;
+  ['piano','guitar','drums','violin','flute'].forEach(i => {
+    const el = document.getElementById('instr-' + i);
+    const btn = document.getElementById('ibtn-' + i);
+    if (el) el.style.display = i === id ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', i === id);
+  });
+  showToast(`Switched to ${id.charAt(0).toUpperCase() + id.slice(1)}`);
+}
+
+/* PIANO */
+const PIANO_KEYS = [
+  {note:'C4',type:'white',kb:'a'},{note:'Cs4',type:'black',kb:'w'},
+  {note:'D4',type:'white',kb:'s'},{note:'Ds4',type:'black',kb:'e'},
+  {note:'E4',type:'white',kb:'d'},{note:'F4',type:'white',kb:'f'},
+  {note:'Fs4',type:'black',kb:'t'},{note:'G4',type:'white',kb:'g'},
+  {note:'Gs4',type:'black',kb:'y'},{note:'A4',type:'white',kb:'h'},
+  {note:'As4',type:'black',kb:'u'},{note:'B4',type:'white',kb:'j'},
+  {note:'C5',type:'white',kb:'k'},{note:'D5',type:'white',kb:'l'},
+  {note:'E5',type:'white',kb:';'},
+];
+const CMAJOR = ['C4','D4','E4','F4','G4','A4','B4','C5'];
+let scaleActive = false, scaleProgress = [];
+
+function buildPiano() {
+  const c = document.getElementById('pianoKeys'); c.innerHTML = ''; c.style.position = 'relative';
+  PIANO_KEYS.filter(k=>k.type==='white').forEach(k => {
+    const el = document.createElement('div'); el.className = 'key-white';
+    el.dataset.note = k.note; el.setAttribute('aria-label',k.note.replace('s','#'));
+    el.tabIndex = 0; el.innerHTML = `<span style="pointer-events:none">${k.kb.toUpperCase()}</span>`;
+    el.addEventListener('mousedown', () => pressKey(k.note, el));
+    el.addEventListener('touchstart', e => { e.preventDefault(); pressKey(k.note, el); }, {passive:false});
+    c.appendChild(el);
+  });
+  const bOff = [34,80,160,206,252];
+  PIANO_KEYS.filter(k=>k.type==='black').forEach((k,i) => {
+    const el = document.createElement('div'); el.className = 'key-black';
+    el.dataset.note = k.note; el.style.left = bOff[i] + 'px';
+    el.addEventListener('mousedown', e => { e.stopPropagation(); pressKey(k.note, el); });
+    el.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); pressKey(k.note, el); }, {passive:false});
+    c.appendChild(el);
+  });
+}
+function pressKey(note, el) {
+  const freq = FREQS[note]; if (!freq) return;
+  playPiano(freq, 1.2); el.classList.add('pressed'); setTimeout(()=>el.classList.remove('pressed'),350);
+  document.getElementById('piano-feedback').textContent = `🎵 ${note.replace('s','#')} — ${freq.toFixed(1)} Hz`;
+  document.getElementById('piano-feedback').className = 'feedback-box';
+  if (scaleActive) {
+    const expected = CMAJOR[scaleProgress.length];
+    if (note === expected) { scaleProgress.push(note); updateScaleUI();
+      if (scaleProgress.length === CMAJOR.length) { scaleActive = false;
+        document.getElementById('piano-feedback').textContent = '🎉 Perfect! C Major scale complete!';
+        document.getElementById('piano-feedback').className = 'feedback-box feedback-correct';
+        showToast('🎉 +20 XP — Scale complete!');
+      }
+    } else { document.getElementById('piano-feedback').textContent = `❌ Expected ${expected.replace('s','#')}`;
+      document.getElementById('piano-feedback').className = 'feedback-box feedback-miss'; }
+  }
+}
+document.addEventListener('keydown', e => {
+  if (currentInstrument !== 'piano' || ['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  const k = PIANO_KEYS.find(k => k.kb === e.key);
+  if (k) { const el = document.querySelector(`[data-note="${k.note}"]`); if (el) pressKey(k.note, el); }
+});
+function startScaleChallenge() { scaleActive = true; scaleProgress = []; updateScaleUI();
+  document.getElementById('piano-feedback').textContent = '🎯 Play: C → D → E → F → G → A → B → C'; showToast('🎯 Challenge started!'); }
+function resetChallenge() { scaleActive = false; scaleProgress = []; updateScaleUI();
+  document.getElementById('piano-feedback').textContent = 'Press any key or click the piano 🎵';
+  document.getElementById('piano-feedback').className = 'feedback-box'; }
+function updateScaleUI() {
+  const c = document.getElementById('scale-progress'); if (!c) return; c.innerHTML = '';
+  CMAJOR.forEach((note,i) => {
+    const dot = document.createElement('div');
+    const done = i < scaleProgress.length, cur = i === scaleProgress.length;
+    dot.style.cssText = `width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;font-family:var(--font-mono);background:${done?'rgba(16,185,129,0.15)':cur?'rgba(249,115,22,0.15)':'var(--bg3)'};color:${done?'var(--emerald)':cur?'var(--accent)':'var(--text3)'};border:2px solid ${done?'rgba(16,185,129,0.35)':cur?'var(--accent)':'var(--border)'};`;
+    dot.textContent = note.replace('s','#').replace(/\d/,''); c.appendChild(dot);
+  });
+  document.getElementById('scale-bar').style.width = (scaleProgress.length / CMAJOR.length * 100) + '%';
+}
+
+/* GUITAR */
+const GUITAR_STRINGS = [
+  {name:'E2',notes:['E2','F2','Fs2','G2','Gs2','A2','As2','B2']},
+  {name:'A2',notes:['A2','As2','B2','C3','Cs3','D3','Ds3','E3']},
+  {name:'D3',notes:['D3','Ds3','E3','F3','Fs3','G3','Gs3','A3']},
+  {name:'G3',notes:['G3','Gs3','A3','As3','B3','C4','Cs4','D4']},
+  {name:'B3',notes:['B3','C4','Cs4','D4','Ds4','E4','F4','Fs4']},
+  {name:'E4',notes:['E4','F4','Fs4','G4','Gs4','A4','As4','B4']},
+];
+function buildGuitar() {
+  const c = document.getElementById('guitarStrings'); if (!c) return; c.innerHTML = '';
+  GUITAR_STRINGS.forEach(str => {
+    const row = document.createElement('div'); row.className = 'guitar-string-row';
+    const lbl = document.createElement('div'); lbl.className = 'string-label'; lbl.textContent = str.name.replace('s','#');
+    const line = document.createElement('div'); line.className = 'string-line';
+    str.notes.forEach((note,fi) => {
+      const freq = FREQS[note] || 196;
+      const btn = document.createElement('div'); btn.className = 'fret-btn'; btn.style.left = (fi * 12.5) + '%'; btn.textContent = fi;
+      btn.addEventListener('mousedown', () => { playGuitar(freq,1.0); btn.classList.add('pressed'); setTimeout(()=>btn.classList.remove('pressed'),350);
+        document.getElementById('guitar-feedback').textContent = `🎸 ${str.name} F${fi} — ${note.replace('s','#')} (${freq.toFixed(0)} Hz)`; });
+      line.appendChild(btn);
+    });
+    row.appendChild(lbl); row.appendChild(line); c.appendChild(row);
+  });
+}
+
+/* DRUMS */
+const DRUM_PADS = [{name:'Kick',key:'Q',type:'kick',color:'#dc2626'},{name:'Snare',key:'W',type:'snare',color:'#d97706'},{name:'Hi-Hat',key:'E',type:'hihat',color:'#16a34a'},{name:'Open HH',key:'R',type:'openhat',color:'#2563eb'},{name:'Tom 1',key:'A',type:'tom',color:'#7c3aed'},{name:'Tom 2',key:'S',type:'tom2',color:'#db2777'},{name:'Crash',key:'D',type:'crash',color:'#ea580c'},{name:'Ride',key:'F',type:'ride',color:'#0891b2'}];
+let drumScore = 0;
+function buildDrums() {
+  const c = document.getElementById('drumPads'); if (!c) return; c.innerHTML = '';
+  DRUM_PADS.forEach(pad => {
+    const el = document.createElement('button'); el.className = 'drum-pad'; el.style.background = pad.color;
+    el.innerHTML = `<span style="font-size:1rem">🥁</span>${pad.name}<span style="font-size:0.6rem;opacity:0.7">[${pad.key}]</span>`;
+    el.addEventListener('mousedown', () => { playDrum(pad.type); el.classList.add('hit'); setTimeout(()=>el.classList.remove('hit'),120);
+      document.getElementById('drum-feedback').textContent = `🥁 ${pad.name}`; drumScore += 5;
+      document.getElementById('drum-score').textContent = drumScore + ' pts';
+      document.getElementById('drum-bar').style.width = Math.min(100,(drumScore/200)*100) + '%'; });
+    c.appendChild(el);
+  });
+}
+document.addEventListener('keydown', e => {
+  if (currentInstrument !== 'drums' || ['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  const pad = DRUM_PADS.find(p => p.key === e.key.toUpperCase());
+  if (pad) { const pads = document.querySelectorAll('.drum-pad'); pads[DRUM_PADS.indexOf(pad)]?.dispatchEvent(new MouseEvent('mousedown')); }
+});
+
+/* VIOLIN */
+function buildViolin() {
+  const c = document.getElementById('violin-interface'); if (!c) return;
+  const strings = [{name:'G3',notes:['G3','A3','B3','C4','D4']},{name:'D4',notes:['D4','E4','F4','G4','A4']},{name:'A4',notes:['A4','B4','C5','D5','E5']},{name:'E5',notes:['E5','F5','G5','A5','B5']}];
+  c.innerHTML = '';
+  strings.forEach(s => {
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:12px;';
+    row.innerHTML = `<span style="color:var(--amber);font-family:var(--font-mono);font-size:0.75rem;width:26px;">${s.name.replace('s','#')}</span>`;
+    const line = document.createElement('div'); line.style.cssText = 'flex:1;height:3px;background:linear-gradient(90deg,#8b7355,#d4b483,#8b7355);position:relative;border-radius:2px;';
+    s.notes.forEach((note,i) => {
+      const freq = FREQS[note] || 440;
+      const dot = document.createElement('div');
+      dot.style.cssText = `position:absolute;width:26px;height:26px;border-radius:50%;background:rgba(16,185,129,0.15);border:2px solid rgba(16,185,129,0.35);cursor:pointer;top:50%;transform:translateY(-50%);left:${i*22}%;display:flex;align-items:center;justify-content:center;font-size:0.58rem;color:var(--emerald);font-family:var(--font-mono);transition:all .12s;`;
+      dot.textContent = note.replace('s','#').replace(/\d/,'');
+      dot.addEventListener('mousedown', () => { playViolin(freq,.8); dot.style.background='var(--emerald)'; dot.style.color='white';
+        setTimeout(()=>{ dot.style.background='rgba(16,185,129,0.15)'; dot.style.color='var(--emerald)'; },400);
+        document.getElementById('violin-feedback').textContent = `🎻 ${note.replace('s','#')} — ${freq.toFixed(0)} Hz`; });
+      line.appendChild(dot);
+    });
+    row.appendChild(line); c.appendChild(row);
+  });
+}
+
+/* FLUTE */
+function buildFlute() {
+  const c = document.getElementById('flute-interface'); if (!c) return;
+  const notes = [{note:'C4',label:'C'},{note:'D4',label:'D'},{note:'E4',label:'E'},{note:'F4',label:'F'},{note:'G4',label:'G'},{note:'A4',label:'A'},{note:'B4',label:'B'},{note:'C5',label:'C\''}];
+  c.innerHTML = '<div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;"></div>';
+  const row = c.firstChild;
+  notes.forEach(n => {
+    const freq = FREQS[n.note] || 261;
+    const hole = document.createElement('div');
+    hole.style.cssText = 'width:46px;height:46px;border-radius:50%;background:rgba(249,115,22,0.1);border:2px solid rgba(249,115,22,0.25);cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;color:var(--accent);font-family:var(--font-mono);transition:all .15s;';
+    hole.textContent = n.label;
+    hole.addEventListener('mousedown', () => { playFlute(freq,.6); hole.style.background='var(--accent)'; hole.style.color='white';
+      setTimeout(()=>{ hole.style.background='rgba(249,115,22,0.1)'; hole.style.color='var(--accent)'; },400);
+      document.getElementById('flute-feedback').textContent = `🪈 ${n.label} — ${freq.toFixed(0)} Hz`; });
+    row.appendChild(hole);
+  });
+}
+
+/* LESSONS */
+function buildLessons() {
+  const list = document.getElementById('lessons-list');
+  const lessons = [{title:'Find Middle C',desc:'Locate and play C4',done:true},{title:'White Keys A-G',desc:'Learn all natural notes',done:true},{title:'C Major Scale',desc:'Play the full scale',done:false,current:true},{title:'Sharp & Flat Notes',desc:'Explore the black keys',done:false},{title:'Two-Hand Basics',desc:'Coordinate both hands',done:false},{title:'First Melody',desc:'Play Twinkle Twinkle',done:false}];
+  lessons.forEach((l,i) => {
+    list.insertAdjacentHTML('beforeend',
+    `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;">
+      <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;background:${l.done?'rgba(16,185,129,0.15)':l.current?'rgba(249,115,22,0.15)':'var(--bg3)'};color:${l.done?'var(--emerald)':l.current?'var(--accent)':'var(--text3)'};">${l.done?'✓':(i+1)}</div>
+      <div style="flex:1;"><div style="font-weight:600;font-size:0.85rem;">${l.title}</div><div style="color:var(--text2);font-size:0.72rem;">${l.desc}</div></div>
+      ${l.done?'<span class="badge badge-green">Done</span>':l.current?'<span class="badge badge-sky">Current</span>':'<span style="color:var(--text3);font-size:0.72rem;">🔒</span>'}
+    </div>`);
+  });
+}
+
+buildPiano(); buildGuitar(); buildDrums(); buildViolin(); buildFlute(); buildLessons(); updateScaleUI();
+</script>
+</body>
+</html>
